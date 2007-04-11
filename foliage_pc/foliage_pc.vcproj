@@ -184,6 +184,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\game\enemy.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\game\enemy.hpp"
+				>
+			</File>
+			<File
 				RelativePath="..\game\font.cpp"
 				>
 			</File>
@@ -192,11 +200,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\game\star.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\game\star.hpp"
+				RelativePath="..\game\gamecolor.hpp"
 				>
 			</File>
 			<File

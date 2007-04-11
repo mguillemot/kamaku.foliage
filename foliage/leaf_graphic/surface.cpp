@@ -122,14 +122,13 @@ inline Uint32 ReadUIntLil(FILE *fptr)
 
 inline Foliage::Color create_color_from_truecolor(Uint32 truecolor)
 {
-	Foliage::Color color;
 	Uint32 r = (truecolor >> 16) & 0xff;
 	Uint32 g = (truecolor >> 8) & 0xff;
 	Uint32 b = truecolor & 0xff;
 	r >>= 3;
 	g >>= 2;
 	b >>= 3;
-	color = (r << 11) | (g << 5) | b;
+	Foliage::Color color = (r << 11) | (g << 5) | b;
 	return color;
 }
 
@@ -153,10 +152,10 @@ Foliage::Surface *Foliage::Surface::readBMP(const std::string &filename)
 {
 	FILE *infile;
 	#ifdef __PPC__
-		infile = fopen(filename.c_str(), "r");
+		infile = fopen(filename.c_str(), "rb");
 	#else
 		std::string filename2 = "../game/resources/" + filename;
-		infile = fopen(filename2.c_str(), "r");
+		infile = fopen(filename2.c_str(), "rb");
 	#endif
 
 	if (infile == NULL)
@@ -189,7 +188,7 @@ Foliage::Surface *Foliage::Surface::readBMP(const std::string &filename)
 	if (infoheader.width > 1024)
 	{
 		std::cout << "Cannot read BMP with width > 1024." << std::endl;
-		return NULL;
+		exit(1);
 	}
 	
 	// Compute line (or column) padding on 4 pixels (due to 64-bit PLB)
@@ -207,7 +206,7 @@ Foliage::Surface *Foliage::Surface::readBMP(const std::string &filename)
 	{
 		std::cout << "Not enough memory." << std::endl;
 		fclose(infile);
-		return NULL;
+		exit(1);
 	}
 
 	// Read raw 24-bit data, transform them to system colors, and write them in memory
@@ -216,10 +215,10 @@ Foliage::Surface *Foliage::Surface::readBMP(const std::string &filename)
 	PadToNextMultipleOfFour(linewidth);
 	for (Sint32 j = infoheader.height - 1; j >= 0; j--)
 	{
-		fread(readBuffer, 1, linewidth, infile);
+		int r = fread(readBuffer, 1, linewidth, infile);
 		for (Sint32 i = 0; i < infoheader.width; i++)
 		{
-			Uint32 temp = ((((readBuffer[i*3+2] << 8) | readBuffer[(i*3)+1]) << 8) | readBuffer[(i*3)]);
+			Uint32 temp = ((((readBuffer[i * 3 + 2] << 8) | readBuffer[i * 3 + 1]) << 8) | readBuffer[i * 3]);
 			Color *writeaddr = baseaddr;
 			#ifdef REARRANGE_SURFACES
 				// If TATE mode, transform the line data to column data
@@ -249,7 +248,7 @@ Foliage::Surface *Foliage::Surface::readBMP(const std::string &filename)
 			for (Sint32 i = infoheader.width; i < width; i++)
 			{
 				Color *writeaddr = baseaddr;
-				writeaddr += (j * infoheader.width + i);
+				writeaddr += (j * width + i);
 				*writeaddr = Foliage::Colors::Transparent;
 			}
 		}
@@ -259,7 +258,7 @@ Foliage::Surface *Foliage::Surface::readBMP(const std::string &filename)
 	Foliage::flushDCache();
 
 	// Allocates and create the surface
-	return new(Foliage::Eternal) Surface(Foliage::Surface(Foliage::Size(width, height), baseaddr, filename));
+	return new(Foliage::Eternal) Foliage::Surface(Foliage::Size(width, height), baseaddr, filename);
 }
 
 #ifdef __PPC__
@@ -276,25 +275,25 @@ Foliage::Surface *Foliage::Surface::createNewShiftedSurface(const Sint32 shift) 
 	
 	// Compute the shifted surface
 	#ifdef REARRANGE_SURFACES
-	for (Sint32 j = shift; j < _size.h; j++)
-	{
-		for (Sint32 i = 0; i < _size.w; i++)
+		for (Sint32 j = shift; j < _size.h; j++)
 		{
-			Foliage::Color *writeaddr = baseaddr;
-			writeaddr += (i * _size.h + (_size.h - 1 - j));
-			*writeaddr = _pixels[(i * _size.h + (_size.h - 1 - (j - shift)))];
+			for (Sint32 i = 0; i < _size.w; i++)
+			{
+				Foliage::Color *writeaddr = baseaddr;
+				writeaddr += (i * _size.h + (_size.h - 1 - j));
+				*writeaddr = _pixels[(i * _size.h + (_size.h - 1 - (j - shift)))];
+			}
 		}
-	}
 	#else
-	for (Sint32 j = 0; j < _size.h; j++)
-	{
-		for (Sint32 i = shift; i < _size.w; i++)
+		for (Sint32 j = 0; j < _size.h; j++)
 		{
-			Foliage::Color *writeaddr = baseaddr;
-			writeaddr += (j * width + i);
-			*writeaddr = _pixels[(j * _size.w + (i - shift))];
+			for (Sint32 i = shift; i < _size.w; i++)
+			{
+				Foliage::Color *writeaddr = baseaddr;
+				writeaddr += (j * width + i);
+				*writeaddr = _pixels[(j * _size.w + (i - shift))];
+			}
 		}
-	}
 	#endif
 	
 	// Flush processor cache

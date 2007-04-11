@@ -15,6 +15,7 @@
 #define	FLOAT_RESOLUTIONf 0 
 //#define FLOAT_RESOLUTIONf 0.0000152587890625f
 
+#define F_0            Foliage::Fixed(true, 0)
 #define F_1            Foliage::Fixed(true, 1 << 16)
 #define F_10           Foliage::Fixed(true, 10 << 16)
 #define F_100          Foliage::Fixed(true, 100 << 16)
@@ -23,6 +24,7 @@
 #define F_0_DOT_1      Foliage::Fixed(true, 6553)
 #define F_PI           Foliage::Fixed(true, 205887)
 #define F_PI_2         Foliage::Fixed(true, 102943)
+#define F_3_PI_2       Foliage::Fixed(true, 308830)
 #define F_TWOPI        Foliage::Fixed(true, 411774)
 #define F_2000_OVER_PI Foliage::Fixed(true, 41721513)
 #define F_MINUS_PI_2   Foliage::Fixed(true, -205887)

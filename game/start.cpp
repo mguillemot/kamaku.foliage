@@ -3,8 +3,9 @@
 #include <list>
 #include "foliage.hpp"
 #include "bullet.hpp"
-#include "star.hpp"
 #include "font.hpp"
+#include "gamecolor.hpp"
+#include "enemy.hpp"
 
 #ifdef main
 #undef main
@@ -12,8 +13,6 @@
 
 using namespace std;
 using namespace Foliage;
-
-#define NB_STARS 0
 
 void append_string(string &s, Sint32 n, Sint32 min_len = 1)
 {
@@ -45,38 +44,9 @@ void append_string(string &s, Sint32 n, Sint32 min_len = 1)
 	}
 }
 
-Bullet *fire_at(const Foliage::Point from, const Foliage::Point to, const Fixed speed, const Fixed shift_angle)
-{
-    Fixed angle;
-    if (to.x < 0 && to.y < 0)
-    {
-        angle = shift_angle;
-    }
-    else
-    {
-        Sint32 dx = to.x - from.x;
-        Sint32 dy = to.y - from.y;
-        if (dx != 0)
-        {
-            angle = Foliage::FastMath::atan(Fixed(Sint32(dy)) / Fixed(int(dx)));
-        }
-        else if (dy > 0)
-        {
-            angle = F_PI_2;
-        }
-        else
-        {
-            angle = F_MINUS_PI_2;
-        }
-        if (dx < 0)
-        {
-            angle += F_PI;
-        }
-        angle += shift_angle;
-    }
-    Bullet *shot = new Bullet(from, angle, speed);
-    return shot;
-}
+ListBullet enemyBullets, myBullets;
+Sprite *playerShip = NULL;
+bool show_hitbox = false;
 
 void start()
 {
@@ -88,16 +58,9 @@ void start()
 	*/
 	SoundManager::disableSound();
 
-	Sint32 i;
+	Bullet::loadBulletSurfaces();
+
 	Sint32 skipped = 0;
-	typedef list<Bullet*> ListBullet; //, PoolAllocator<Bullet*, LevelPool> (disabled for x86 compatibility)
-	typedef list<Star*> ListStar;
-	ListBullet bullets;
-	ListStar stars;
-    for (i = 0; i < NB_STARS; i++)
-    {
-        stars.push_back(new Star());
-    }
     Font font;
     cout << "Font loaded." << endl;
     Foliage::Sprite background("bg.bmp"); // 300x3910
@@ -106,7 +69,9 @@ void start()
 		Foliage::Sprite background2(background.getCurrentSurface()->createNewShiftedSurface(2));
 		Foliage::Sprite background3(background.getCurrentSurface()->createNewShiftedSurface(3));
 	#endif
+	ListEnemy enemies;
 	Foliage::Sprite ship("vaiss00.bmp");
+	playerShip = &ship;
 	ship.addFrame("vaiss01.bmp");
 	ship.addFrame("vaiss02.bmp");
 	ship.addFrame("vaiss03.bmp");
@@ -115,15 +80,12 @@ void start()
     Rect shipHitbox = Rect(10, 11, 8, 9);
     ship.setHitbox(shipHitbox);
     ship.setPosition(Point(100, 250));
-    Foliage::Sprite enemy("ennemi.bmp");
-    Rect enemyHitbox = Rect(4, 13, 30, 15);
-    enemy.setHitbox(enemyHitbox);
-    enemy.setPosition(Point(100, 20));
 	Speed s;
 	Sint32 frame = 0;
 	const Fixed ShipSpeed = Fixed(1.5f);
 	Sint32 hitCount = 0;
 	Sint32 randlevel = 10;
+	bool fireShot = false;
 
 	//SoundManager::playBg(&bg);		
 	
@@ -150,6 +112,17 @@ void start()
 				else if (e.getButton() == DOWN)
 				{
 					s.y += adj_speed;
+				}
+				else if (e.getButton() == BUTTON1)
+				{
+					fireShot = e.getPushed();
+				}
+			}
+			else // player 2
+			{
+				if (e.getButton() == BUTTON3 && e.getPushed())
+				{
+					show_hitbox = !show_hitbox;
 				}
 				else if (e.getButton() == BUTTON1 && e.getPushed())
 				{
@@ -194,43 +167,106 @@ void start()
 			waitEndOfBg = Screen::asyncBlitSection(background.getCurrentSurface(), section, Point(0, 0));
 		#endif
 		ship.move();
-		enemy.move();
-		/* wrong place due to bg sync
-        for (ListStar::iterator i = stars.begin(); i != stars.end(); i++)
-        {
-            (*i)->display();
-            (*i)->update();
-        }
-        */
-		if ((rand() % randlevel) == 0)
+		ListEnemy::iterator enn = enemies.begin();
+		while (enn != enemies.end())
 		{
-			for (Sint32 j = -30; j <= 30; j++)
+			Enemy *e = *enn;
+			if (e->getKilled())
 			{
-				Bullet *shot = fire_at(enemy.getCenter(), ship.getCenter(), Fixed(4), Fixed(j) / 15);
-				bullets.push_back(shot);
+				delete e;
+				enn = enemies.erase(enn);
 			}
+			else
+			{
+				e->getSprite()->move();
+				if (e->getSprite()->getPosition().y >= Screen::Height) // go out the bottom part
+				{
+					delete e;
+					enn = enemies.erase(enn);
+				}
+				else
+				{
+					e->update();
+					++enn;
+				}
+			}
+		}
+		if (fireShot)
+		{
+			Bullet *b1 = new Bullet(ship.getCenter(), F_3_PI_2, Fixed(20), 2);
+			Bullet *b2 = new Bullet(ship.getCenter(), F_3_PI_2 + F_0_DOT_1, Fixed(20), 2);
+			Bullet *b3 = new Bullet(ship.getCenter(), F_3_PI_2 - F_0_DOT_1, Fixed(20), 2);
+			myBullets.push_back(b1);
+			myBullets.push_back(b2);
+			myBullets.push_back(b3);
+		}	
+		if ((frame % 25) == 0) // pop new enemies
+		{
+			GameColor c;
+			Sint32 r = rand() % 100;
+			if (r < 20)
+			{
+				c = Red;
+			}
+			else if (r < 40)
+			{
+				c = Green;
+			}
+			else if (r < 60)
+			{
+				c = Blue;
+			}
+			else if (r < 70)
+			{
+				c = Yellow;
+			}
+			else if (r < 80)
+			{
+				c = Purple;
+			}
+			else if (r < 90)
+			{
+				c = Lightblue;
+			}
+			else if (r < 95)
+			{
+				c = White;
+			}
+			else
+			{
+				c = Black;
+			}
+			Enemy *e = new Enemy(c);
+			Sint32 sx = (rand() % 3) - 1;
+			Sint32 sy = (rand() % 7) - 3;
+			e->getSprite()->setPosition(Point((rand() % 150) + 45, -50));
+			e->getSprite()->setSpeed(Speed(Fixed(sx), Fixed(sy)));
+			enemies.push_back(e);
 		}
 		waitEndOfBg();
 		string frame_nb = "frame #";
 		append_string(frame_nb, frame);
 		string bullets_nb;
-		append_string(bullets_nb, bullets.size(), 4);
+		append_string(bullets_nb, enemyBullets.size(), 4);
 		bullets_nb += " bullets";
 		string frameskip_nb = "frameskip ";
 		append_string(frameskip_nb, skipped);
 		string randlevel_nb = "level ";
 		append_string(randlevel_nb, randlevel);
 		ship.draw();
-		enemy.draw();
+		for (ListEnemy::const_iterator enn = enemies.begin(); enn != enemies.end(); ++enn)
+		{
+			(*enn)->getSprite()->draw();
+		}
 		const Rect shipHb = ship.getScreenHitbox();
-		ListBullet::iterator i = bullets.begin();
-		while (i != bullets.end())
+		ListBullet::iterator i = enemyBullets.begin();
+		while (i != enemyBullets.end())
 		{
 			Bullet *b = *i;
 			b->update();
 			if (b->getSprite()->outOfScreen())
 			{
-				i = bullets.erase(i);
+				i = enemyBullets.erase(i);
 				delete b;
 			}
 			else
@@ -239,7 +275,7 @@ void start()
 				Rect bHb = b->getSprite()->getScreenHitbox();
 				if (Rect::intersects(shipHb, bHb))
 				{
-					i = bullets.erase(i);
+					i = enemyBullets.erase(i);
 					delete b;
 					hitCount++;
 				}
@@ -249,13 +285,46 @@ void start()
 				}
 			}
 		}
+		ListBullet::iterator j = myBullets.begin();
+		while (j != myBullets.end())
+		{
+			Bullet *b = *j;
+			b->update();
+			if (b->getSprite()->outOfScreen())
+			{
+				j = myBullets.erase(j);
+				delete b;
+			}
+			else
+			{
+				bool deleted = false;
+				b->getSprite()->draw();
+				const Rect bHb = b->getSprite()->getScreenHitbox();
+				for (ListEnemy::iterator enn = enemies.begin(); enn != enemies.end(); ++enn)
+				{
+					const Rect eHb = (*enn)->getSprite()->getScreenHitbox();
+					if (Rect::intersects(bHb, eHb))
+					{
+						j = myBullets.erase(j);
+						delete b;
+						(*enn)->damage(25);
+						deleted = true;
+						break;
+					}
+				}
+				if (!deleted)
+				{
+					++j;
+				}
+			}
+		}
 		font.drawString(frame_nb, Point(0, 0));
 		font.drawString(bullets_nb, Point(0, 17));
 		font.drawString(frameskip_nb, Point(0, 34));
 		font.drawString(randlevel_nb, Point(0, 51));
 		if ((frame % 1000) == 0)
 		{
-			cout << bullets.size() << " bullets!" << endl;
+			cout << enemyBullets.size() << " bullets!" << endl;
 			printMemoryUsage();
 		}
 		if (frame % 300 == 0)
@@ -278,35 +347,6 @@ void start()
 
 int main()
 {
-	/*
-	XCache_DisableDCache();
-	
-	Sint32 *bidon_int = (Sint32 *)0x08000000;
-	float *bidon_float = (float *)0x08000004;
-	Sint32 c;
-	float aa, bb, cc;
-	Sint32 aaa, bbb, ccc;
-	Timer t1;
-	t1.start();
-	for (c = 0; c < 1000; c++)
-	{
-		aa = atan(c);
-		*bidon_float = aa;
-	}
-	t1.stop();
-	Timer t2;
-	t2.start();
-	for (c = 0; c < 1000; c++)
-	{
-		aa = fast_atan(c);
-		*bidon_float = aa;
-	}
-	t2.stop();
-	cout << "v1=" << (Sint32)(t1.duration() * 1000000) << "us / v2=" 
-		<< (Sint32)(t2.duration() * 1000000) << "us" << endl;
-	while(1);
-	*/	
-
 	Foliage::init();
 	start();
 	while (true)

@@ -41,7 +41,5 @@ void Foliage::Instancizator::instancize(Foliage::Surface *surf)
 		{
 			std::cout << "Impossible to instancize more surfaces." << std::endl;
 		}
-	#else
-		std::cout << "Foliage::Instancizator not available for x86." << std::endl;
 	#endif
 }

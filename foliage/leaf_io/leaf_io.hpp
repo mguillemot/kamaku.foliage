@@ -15,10 +15,10 @@ namespace Foliage
 	public:
 		InputEvent(const Button button, const Sint32 player, const bool pushed);
 		InputEvent(const char debugChar, const Sint32 player, const bool pushed);
-		Button getButton() const;
-		Sint32 getPlayer() const;
-		bool getPushed() const;
-		char getDebugChar() const;
+		Button getButton() const { return _button; }
+		Sint32 getPlayer() const { return _player; }
+		bool getPushed() const { return _pushed; }
+		char getDebugChar() const { return _debugChar; }
 	
 	private:
 		Button _button;
@@ -51,26 +51,6 @@ namespace Foliage
 	inline InputEvent::InputEvent(const char debugChar, const Sint32 player, const bool pushed)
 		: _button(DEBUG), _player(player), _pushed(pushed), _debugChar(debugChar)
 	{
-	}
-
-	inline Button InputEvent::getButton() const
-	{ 
-		return _button; 
-	}
-	
-	inline Sint32 InputEvent::getPlayer() const 
-	{ 
-		return _player; 
-	}
-		
-	inline bool InputEvent::getPushed() const 
-	{ 
-		return _pushed; 
-	}
-	
-	inline char InputEvent::getDebugChar() const 
-	{ 
-		return _debugChar; 
 	}
 	
 }
