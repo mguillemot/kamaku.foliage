@@ -3,7 +3,34 @@
 
 #ifdef __PPC__
 	#include <sysace_stdio.h>
+	#define FILE SYSACE_FILE
+	#define fopen sysace_fopen
+	#define fread sysace_fread
+	#define fclose sysace_fclose
+#else
+	#include <cstdio>
 #endif
+
+inline Uint16 ReadUShort(FILE *fptr)
+{
+	Uint8 readBuffer[2];
+	fread(readBuffer, 1, 2, fptr);
+	return ((readBuffer[1] << 8) | readBuffer[0]);
+}
+
+inline Uint32 ReadUIntLil(FILE *fptr)
+{
+	Uint8 readBuffer[4];
+	fread(readBuffer, 1, 4, fptr);
+	return ((((((readBuffer[3] << 8) | readBuffer[2]) << 8) | readBuffer[1]) << 8) | readBuffer[0]);
+}
+
+inline Uint32 ReadUIntBig(FILE *fptr)
+{
+	Uint8 readBuffer[4];
+	fread(readBuffer, 1, 4, fptr);
+	return ((((((readBuffer[0] << 8) | readBuffer[1]) << 8) | readBuffer[2]) << 8) | readBuffer[3]);
+}
 
 struct RIFFCHUNK
 {
@@ -31,36 +58,14 @@ struct DATACHUNK
    Uint32 subchunkSize;
 };
 
-inline Uint16 ReadUShort(SYSACE_FILE *fptr)
-{
-	Uint8 readBuffer[2];
-	sysace_fread(readBuffer, 1, 2, fptr);
-	return ((readBuffer[1] << 8) | readBuffer[0]);
-}
-
-inline Uint32 ReadUIntLil(SYSACE_FILE *fptr)
-{
-	Uint8 readBuffer[4];
-	sysace_fread(readBuffer, 1, 4, fptr);
-	return ((((((readBuffer[3] << 8) | readBuffer[2]) << 8) | readBuffer[1]) << 8) | readBuffer[0]);
-}
-
-inline Uint32 ReadUIntBig(SYSACE_FILE *fptr)
-{
-	Uint8 readBuffer[4];
-	sysace_fread(readBuffer, 1, 4, fptr);
-	return ((((((readBuffer[0] << 8) | readBuffer[1]) << 8) | readBuffer[2]) << 8) | readBuffer[3]);
-}
-
 Foliage::Sound::Sound(const std::string filename)
 	: _curSample(0)
 {
 	Uint8 readBuffer[2048];
-	SYSACE_FILE *infile;
 	RIFFCHUNK riffchunk;
 	FMTCHUNK fmtchunk;
 	DATACHUNK datachunk;
-	infile = sysace_fopen(filename.c_str(), "r");
+	FILE *infile = fopen(filename.c_str(), "r");
 	if (infile == NULL)
 	{
 		std::cout << "Couldn't open file " << filename << std::endl;
@@ -102,14 +107,14 @@ Foliage::Sound::Sound(const std::string filename)
 			Uint32 totalRead = 0;
 			while (totalRead < datachunk.subchunkSize)
 			{
-				Sint32 numRead = sysace_fread(readBuffer, 1, 2048, infile);
+				Sint32 numRead = fread(readBuffer, 1, 2048, infile);
 				totalRead += numRead;
 				for (Sint32 i = 0; i < numRead; i += 4)
 				{
 					_samples[curSample++] = ((((((readBuffer[i+3] << 8) | readBuffer[i+2]) << 8) | readBuffer[i+1]) << 8) | readBuffer[i]);
 				}
 			}
-			sysace_fclose(infile);
+			fclose(infile);
 			while (curSample < _samplesNb)
 			{
 				_samples[curSample++] = 0;

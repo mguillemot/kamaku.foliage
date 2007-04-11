@@ -5,22 +5,27 @@
 #include <cmath>
 
 #ifdef __PPC__
-
 	#include <xbasic_types.h>
-	
-	typedef Xuint8   Uint8;
-	typedef Xint8    Sint8;
-	typedef Xuint16  Uint16;
-	typedef Xint16   Sint16;
-	typedef Xuint32  Uint32;
-	typedef Xint32   Sint32;
-
+#else
+	#include <SDL.h>
 #endif
 
 #define FIXED_RESOLUTION  65536
 #define FIXED_RESOLUTIONf 65536.0f
-#define	FLOAT_RESOLUTIONf 0
-//0.0000152587890625f
+#define	FLOAT_RESOLUTIONf 0 
+//#define FLOAT_RESOLUTIONf 0.0000152587890625f
+
+#define F_1            Foliage::Fixed(true, 1 << 16)
+#define F_10           Foliage::Fixed(true, 10 << 16)
+#define F_100          Foliage::Fixed(true, 100 << 16)
+#define F_1000         Foliage::Fixed(true, 1000 << 16)
+#define F_10000        Foliage::Fixed(true, 10000 << 16)
+#define F_0_DOT_1      Foliage::Fixed(true, 6553)
+#define F_PI           Foliage::Fixed(true, 205887)
+#define F_PI_2         Foliage::Fixed(true, 102943)
+#define F_TWOPI        Foliage::Fixed(true, 411774)
+#define F_2000_OVER_PI Foliage::Fixed(true, 41721513)
+#define F_MINUS_PI_2   Foliage::Fixed(true, -205887)
 
 inline Sint32 mul32x32(Sint32 a, Sint32 b)
 {
@@ -36,18 +41,6 @@ inline Sint32 div32x32(Sint32 a, Sint32 b)
 	return (Sint32)ll;
 }
 
-#define F_1            Foliage::Fixed(true, 1 << 16)
-#define F_10           Foliage::Fixed(true, 10 << 16)
-#define F_100          Foliage::Fixed(true, 100 << 16)
-#define F_1000         Foliage::Fixed(true, 1000 << 16)
-#define F_10000        Foliage::Fixed(true, 10000 << 16)
-#define F_0_DOT_1      Foliage::Fixed(true, 6553)
-#define F_PI           Foliage::Fixed(true, 205887)
-#define F_PI_2         Foliage::Fixed(true, 102943)
-#define F_TWOPI        Foliage::Fixed(true, 411774)
-#define F_2000_OVER_PI Foliage::Fixed(true, 41721513)
-#define F_MINUS_PI_2   Foliage::Fixed(true, -205887)
-
 namespace Foliage
 {
 
@@ -56,7 +49,7 @@ namespace Foliage
 	public:
 		Fixed() : v(0) { }
 		Fixed(const Fixed &fix) : v(fix.v) { }
-		explicit Fixed(const int i) { v = i << 16; }
+		//explicit Fixed(const int i) { v = i << 16; }
 		explicit Fixed(const Sint32 i) { v = i << 16; }
 		explicit Fixed(const float f) { v = (Sint32)((f + FLOAT_RESOLUTIONf) * FIXED_RESOLUTIONf); }
 		Fixed(const bool internal, Sint32 v) : v(v) { }

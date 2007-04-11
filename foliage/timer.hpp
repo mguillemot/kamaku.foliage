@@ -1,7 +1,13 @@
 #ifndef _FOLIAGE__TIMER
 #define _FOLIAGE__TIMER
 
-#include <xtime_l.h> //TEMP
+#include "basic_types.hpp"
+
+#ifdef __PPC__
+	#include <xtime_l.h>
+#else
+	#include <SDL.h>
+#endif
 
 namespace Foliage
 {
@@ -13,10 +19,14 @@ namespace Foliage
 		void start();
 		void stop();
 		void reset();
-		float duration() const;
+		Uint32 duration() const; // in microseconds
 		
 	private:
-		XTime _started, _stopped;
+		#ifdef __PPC__
+			XTime _started, _stopped;
+		#else
+			Uint32 _started, _stopped;
+		#endif
 	};	
 	
 }

@@ -7,6 +7,8 @@
 namespace Foliage
 {
 	
+#ifdef __PPC__
+
 	class EternalPool // (64 MB)
 	{
 	public:
@@ -31,8 +33,6 @@ namespace Foliage
 		static Uint32 current;
 	};
 	
-	void printMemoryUsage();
-
 	// Pool memory allocator. Memory can be cleared only for the whole pool at
 	// one time.
 	// WARNING: Pool overflow checks aren't made automatically for speed purposes.
@@ -152,6 +152,10 @@ namespace Foliage
 	        typedef PoolAllocator<U, Pool> other;
 	    };
 	};
+
+#endif
+
+	void printMemoryUsage();
 
 	enum MemoryPersistance { Eternal, Game, Level };
 

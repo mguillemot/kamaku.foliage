@@ -6,6 +6,10 @@
 #include "star.hpp"
 #include "font.hpp"
 
+#ifdef main
+#undef main
+#endif
+
 using namespace std;
 using namespace Foliage;
 
@@ -86,7 +90,7 @@ void start()
 
 	Sint32 i;
 	Sint32 skipped = 0;
-	typedef list<Bullet*, PoolAllocator<Bullet*, LevelPool> > ListBullet;
+	typedef list<Bullet*> ListBullet; //, PoolAllocator<Bullet*, LevelPool> (disabled for x86 compatibility)
 	typedef list<Star*> ListStar;
 	ListBullet bullets;
 	ListStar stars;
@@ -97,9 +101,11 @@ void start()
     Font font;
     cout << "Font loaded." << endl;
     Foliage::Sprite background("bg.bmp"); // 300x3910
-    Foliage::Sprite background1(background.getCurrentSurface()->createNewShiftedSurface(1));
-    Foliage::Sprite background2(background.getCurrentSurface()->createNewShiftedSurface(2));
-    Foliage::Sprite background3(background.getCurrentSurface()->createNewShiftedSurface(3));
+	#ifdef __PPC
+		Foliage::Sprite background1(background.getCurrentSurface()->createNewShiftedSurface(1));
+		Foliage::Sprite background2(background.getCurrentSurface()->createNewShiftedSurface(2));
+		Foliage::Sprite background3(background.getCurrentSurface()->createNewShiftedSurface(3));
+	#endif
 	Foliage::Sprite ship("vaiss00.bmp");
 	ship.addFrame("vaiss01.bmp");
 	ship.addFrame("vaiss02.bmp");
@@ -167,22 +173,26 @@ void start()
 		if (section.y < 0)
 			section.y = 0;
 		Synchronizator waitEndOfBg;
-		if (section.y % 4 == 0)
-		{
-			waitEndOfBg = Screen::asyncBlitSection((Uint32)background.getCurrentSurface()->getPixels(), background.getSize(), section, Point(0, 0));
-		}
-		else if (section.y % 4 == 1)
-		{
-			waitEndOfBg = Screen::asyncBlitSection((Uint32)background3.getCurrentSurface()->getPixels(), background3.getSize(), section, Point(0, 0));
-		}
-		else if (section.y % 4 == 2)
-		{
-			waitEndOfBg = Screen::asyncBlitSection((Uint32)background2.getCurrentSurface()->getPixels(), background2.getSize(), section, Point(0, 0));
-		}
-		else
-		{
-			waitEndOfBg = Screen::asyncBlitSection((Uint32)background1.getCurrentSurface()->getPixels(), background1.getSize(), section, Point(0, 0));
-		}
+		#ifdef __PPC__
+			if (section.y % 4 == 0)
+			{
+				waitEndOfBg = Screen::asyncBlitSection(background.getCurrentSurface(), section, Point(0, 0));
+			}
+			else if (section.y % 4 == 1)
+			{
+				waitEndOfBg = Screen::asyncBlitSection(background3.getCurrentSurface(), section, Point(0, 0));
+			}
+			else if (section.y % 4 == 2)
+			{
+				waitEndOfBg = Screen::asyncBlitSection(background2.getCurrentSurface(), section, Point(0, 0));
+			}
+			else
+			{
+				waitEndOfBg = Screen::asyncBlitSection(background1.getCurrentSurface(), section, Point(0, 0));
+			}
+		#else
+			waitEndOfBg = Screen::asyncBlitSection(background.getCurrentSurface(), section, Point(0, 0));
+		#endif
 		ship.move();
 		enemy.move();
 		/* wrong place due to bg sync

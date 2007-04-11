@@ -2,31 +2,30 @@
 #include "leaf_io.hpp"
 #include "keyboard_fr.hpp"
 
-#ifdef __PPC__
-	#include <xparameters.h>
-	#include <xutil.h>
-	#include <xps2.h>
-	#include <xintc_l.h>
-	#include <xexception_l.h>
-#endif
-
 std::queue<Foliage::InputEvent> Foliage::InputManager::_events;
 
+#ifdef __PPC__
+
+#include <xparameters.h>
+#include <xutil.h>
+#include <xps2.h>
+#include <xintc_l.h>
+#include <xexception_l.h>
 
 #define KEYB_BUFFER_SIZE 10
 #define KEYSTATE_DOWN 0
 #define KEYSTATE_UP 1
 
-typedef struct
+struct virtualkey
 {
-    Xuint8 state;       /* state UP or DOWN of the key */
-    Xuint8 key;    		/* code of the key (as VK_something) */
-} virtualkey;
+    Uint8 state;       /* state UP or DOWN of the key */
+    Uint8 key;    		/* code of the key (as VK_something) */
+};
 
 XPs2 Kbd; // Structure used to initialize and use the keyboard
 Uint8 Kbd_Buf[1]; // Low-level keyboard buffer
-Xuint16 KeyBuffer[KEYB_BUFFER_SIZE];
-Xuint32 KeybRead, KeybWrite;
+Uint16 KeyBuffer[KEYB_BUFFER_SIZE];
+Uint32 KeybRead, KeybWrite;
 
 void intKeyboardHandler(void *KeyboardAdress, Uint32 Event, Uint32 EventData)
 {
@@ -215,6 +214,76 @@ void Foliage::InputManager::init()
 	// Finished!
 	std::cout << " * input manager initialized" << std::endl;
 }
+
+#else
+
+#include <SDL.h>
+
+void Foliage::InputManager::updateInnerQueue()
+{
+	SDL_Event e;
+	while (SDL_PollEvent(&e))
+	{
+		if (e.type != SDL_KEYDOWN && e.type != SDL_KEYUP)
+		{
+			continue;
+		}
+		Foliage::Button button;
+		Sint32 player = 0;
+		switch (e.key.keysym.sym)
+		{
+		case SDLK_s:
+			button = Foliage::LEFT;
+			player = 1;
+			break;
+		case SDLK_e:
+			button = Foliage::UP;
+			player = 1;
+			break;
+		case SDLK_d:
+			button = Foliage::DOWN;
+			player = 1;
+			break;
+		case SDLK_f:
+			button = Foliage::RIGHT;
+			player = 1;
+			break;
+		case SDLK_j:
+			button = Foliage::BUTTON1;
+			player = 1;
+			break;
+		case SDLK_k:
+			button = Foliage::BUTTON2;
+			player = 1;
+			break;
+		case SDLK_l:
+			button = Foliage::BUTTON3;
+			player = 1;
+			break;
+		case SDLK_5:
+			button = Foliage::COIN;
+			player = 1;
+			break;
+		case SDLK_1:
+			button = Foliage::START;
+			player = 1;
+			break;
+		default:
+			continue;
+		}
+		bool pushed = (e.type == SDL_KEYDOWN);
+		InputEvent e(button, player, pushed);
+		_events.push(e);
+	}
+}
+
+void Foliage::InputManager::init()
+{
+	// Nothing to do here, keyboard has been initialized with SDL
+	std::cout << " * input manager initialized" << std::endl;
+}
+
+#endif
 
 Foliage::InputEvent Foliage::InputManager::nextEvent()
 {

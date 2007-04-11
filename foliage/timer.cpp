@@ -2,9 +2,12 @@
 
 #ifdef __PPC__
 	#include <xparameters.h>
+#else
+	#include <SDL.h>
 #endif
 
-Foliage::Timer::Timer() : _started(0), _stopped(0)
+Foliage::Timer::Timer()
+	: _started(0), _stopped(0)
 {
 }
 
@@ -12,37 +15,58 @@ void Foliage::Timer::start()
 {
 	if (_stopped == 0)
 	{
-		XTime_GetTime(&_started);
+		#ifdef __PPC__
+			XTime_GetTime(&_started);
+		#else
+			_started = SDL_GetTicks();
+		#endif
 	}
 	else
 	{
-		XTime now;
-		XTime_GetTime(&now);
-		_started = now - (_stopped - _started);
-		_stopped = 0;
+		#ifdef __PPC__
+			XTime now;
+			XTime_GetTime(&now);
+			_started = now - (_stopped - _started);
+			_stopped = 0;
+		#else
+			_started = SDL_GetTicks() - (_stopped - _started);
+			_stopped = 0;
+		#endif
 	}
 }
 
 void Foliage::Timer::stop()
 {
-	XTime_GetTime(&_stopped);
+	#ifdef __PPC__
+		XTime_GetTime(&_stopped);
+	#else
+		_stopped = SDL_GetTicks();
+	#endif
 }
 
-float Foliage::Timer::duration() const
+Uint32 Foliage::Timer::duration() const
 {
 	if (_started == 0)
 	{
-		return 0.0f;
+		return 0;
 	}
 	if (_stopped == 0)
 	{
-		XTime now;
-		XTime_GetTime(&now);
-		return (float)(now - _started) / XPAR_CPU_PPC405_CORE_CLOCK_FREQ_HZ;
+		#ifdef __PPC__
+			XTime now;
+			XTime_GetTime(&now);
+			return (now - _started) * 1000000 / XPAR_CPU_PPC405_CORE_CLOCK_FREQ_HZ;
+		#else
+			return (SDL_GetTicks() - _started) * 1000;
+		#endif
 	}
 	else
 	{
-		return (float)(_stopped - _started) / XPAR_CPU_PPC405_CORE_CLOCK_FREQ_HZ;
+		#ifdef __PPC__
+			return (_stopped - _started) * 1000000 / XPAR_CPU_PPC405_CORE_CLOCK_FREQ_HZ;
+		#else
+			return (_stopped - _started) * 1000;
+		#endif
 	}
 }
 

@@ -5,13 +5,18 @@
 
 #ifdef __PPC__
 	#include <xparameters.h>
+	Foliage::Fixed *Foliage::FastMath::atan_t0 = (Foliage::Fixed *)(XPAR_PLB_BRAM_IF_CNTLR_1_BASEADDR + 1024 * sizeof(Foliage::Fixed) * 0);
+	Foliage::Fixed *Foliage::FastMath::atan_t1 = (Foliage::Fixed *)(XPAR_PLB_BRAM_IF_CNTLR_1_BASEADDR + 1024 * sizeof(Foliage::Fixed) * 1);
+	Foliage::Fixed *Foliage::FastMath::atan_t2 = (Foliage::Fixed *)(XPAR_PLB_BRAM_IF_CNTLR_1_BASEADDR + 1024 * sizeof(Foliage::Fixed) * 2);
+	Foliage::Fixed *Foliage::FastMath::atan_t3 = (Foliage::Fixed *)(XPAR_PLB_BRAM_IF_CNTLR_1_BASEADDR + 1024 * sizeof(Foliage::Fixed) * 3);
+	Foliage::Fixed *Foliage::FastMath::cos_t = (Foliage::Fixed *)(XPAR_PLB_BRAM_IF_CNTLR_1_BASEADDR + 1024 * sizeof(Foliage::Fixed) * 4);
+#else
+	Foliage::Fixed *Foliage::FastMath::atan_t0 = new Foliage::Fixed[1024];
+	Foliage::Fixed *Foliage::FastMath::atan_t1 = new Foliage::Fixed[1024];
+	Foliage::Fixed *Foliage::FastMath::atan_t2 = new Foliage::Fixed[1024];
+	Foliage::Fixed *Foliage::FastMath::atan_t3 = new Foliage::Fixed[1024];
+	Foliage::Fixed *Foliage::FastMath::cos_t = new Foliage::Fixed[1024];
 #endif
-
-Foliage::Fixed *Foliage::FastMath::atan_t0 = (Foliage::Fixed *)(XPAR_PLB_BRAM_IF_CNTLR_1_BASEADDR + 1024 * sizeof(Foliage::Fixed) * 0);
-Foliage::Fixed *Foliage::FastMath::atan_t1 = (Foliage::Fixed *)(XPAR_PLB_BRAM_IF_CNTLR_1_BASEADDR + 1024 * sizeof(Foliage::Fixed) * 1);
-Foliage::Fixed *Foliage::FastMath::atan_t2 = (Foliage::Fixed *)(XPAR_PLB_BRAM_IF_CNTLR_1_BASEADDR + 1024 * sizeof(Foliage::Fixed) * 2);
-Foliage::Fixed *Foliage::FastMath::atan_t3 = (Foliage::Fixed *)(XPAR_PLB_BRAM_IF_CNTLR_1_BASEADDR + 1024 * sizeof(Foliage::Fixed) * 3);
-Foliage::Fixed *Foliage::FastMath::cos_t = (Foliage::Fixed *)(XPAR_PLB_BRAM_IF_CNTLR_1_BASEADDR + 1024 * sizeof(Foliage::Fixed) * 4);
 
 Foliage::Fixed Foliage::FastMath::cos(const Foliage::Fixed x)
 {

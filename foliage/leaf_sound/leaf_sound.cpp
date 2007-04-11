@@ -3,11 +3,11 @@
 #include "leaf_sound.hpp"
 
 #ifdef __PPC__
-	#include <xac97_l.h>
-	#include <xparameters.h>
-	#include <xintc_l.h>
-	#include <xexception_l.h>
-#endif
+
+#include <xac97_l.h>
+#include <xparameters.h>
+#include <xintc_l.h>
+#include <xexception_l.h>
 
 Foliage::Sound *Foliage::SoundManager::_bg = NULL;
 Foliage::Sound *Foliage::SoundManager::_sfx = NULL;
@@ -114,3 +114,29 @@ void Foliage::SoundManager::playSfx(Foliage::Sound *sfx)
 	sfx->rewind();
 	_sfx = sfx;
 }
+
+#else
+
+void Foliage::SoundManager::init()
+{
+	// TODO
+	std::cout << "TODO: * sound manager initialized" << std::endl;
+}
+
+void Foliage::SoundManager::disableSound()
+{
+	// TODO
+	std::cout << "TODO: LEAF_sound: sound disabled" << std::endl;
+}
+
+void Foliage::SoundManager::playBg(Foliage::Sound *bg)
+{
+	// TODO
+}
+
+void Foliage::SoundManager::playSfx(Foliage::Sound *sfx)
+{
+	// TODO
+}
+
+#endif

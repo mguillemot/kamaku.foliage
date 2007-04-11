@@ -39,40 +39,6 @@ namespace Foliage
 		}
 	};
 	
-	struct HwPoint
-	{
-		Sint16 x, y;
-		
-		HwPoint() : x(0), y(0)
-		{
-		}
-		
-		HwPoint(const Sint16 px, const Sint16 py)
-			: x(px), y(py)
-		{
-		}
-		
-		HwPoint(const Point p)
-		{
-			#ifdef SCREEN_VERTICAL
-			x = SCREEN_WIDTH - 1 - p.y;
-			y = p.x;
-			#else
-			x = p.x;
-			y = p.y;
-			#endif
-		}
-		
-		Point toPoint() const
-		{
-			#ifdef SCREEN_VERTICAL
-			return Point(y, SCREEN_WIDTH - 1 - x);
-			#else
-			return Point(x, y);
-			#endif		
-		}
-	};
-	
 	struct Speed
 	{
 		Fixed x, y;

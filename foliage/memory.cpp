@@ -2,6 +2,8 @@
 #include "memory.hpp"
 #include "basic_types.hpp"
 
+#ifdef __PPC__
+
 Uint32 Foliage::EternalPool::current = Foliage::EternalPool::start;
 Uint32 Foliage::GamePool::current = Foliage::GamePool::start;
 Uint32 Foliage::LevelPool::current = Foliage::LevelPool::start;
@@ -28,3 +30,12 @@ void Foliage::printMemoryUsage()
 	printPoolUsage<LevelPool>();
 	std::cout << std::endl;
 }
+
+#else
+
+void Foliage::printMemoryUsage()
+{
+	std::cout << "Memory usage is not available on x86." << std::endl;
+}
+
+#endif

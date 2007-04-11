@@ -9,68 +9,78 @@
 #ifdef __PPC__
 	#include <sysace_stdio.h>
 	#include <ivga.h>
+	#define FILE SYSACE_FILE
+	#define fopen sysace_fopen
+	#define fread sysace_fread
+	#define fclose sysace_fclose
+#else
+	#include <cstdio>
+	#include <SDL.h>
 #endif
 
 Foliage::Surface::Surface(const Foliage::Size s, Foliage::Color *pixels, const std::string &name) 
-	: _size(s), _pixels(pixels), _name(name), _instancized(-1)
+	: _size(s), _pixels(pixels), _name(name)
 {
+	#ifdef __PPC__
+		_instancized = -1;
+	#else
+		_SDLSurface = SDL_CreateRGBSurfaceFrom(pixels, s.w, s.h, 16, s.w * 2, 0x1f << 11, 0x3f << 5, 0x1f, 0);
+        SDL_SetColorKey(_SDLSurface, SDL_RLEACCEL | SDL_SRCCOLORKEY, SDL_MapRGB(_SDLSurface->format, 0xFF, 0, 0xFF));	
+	#endif
 }
 
 Foliage::Surface::~Surface()
 {
+	#ifndef __PPC__
+		SDL_FreeSurface(_SDLSurface);
+	#endif
 	delete _pixels;
-}
-
-const std::string &Foliage::Surface::getName() const
-{
-	return _name;
 }
 
 Foliage::Color Foliage::Surface::getPixel(const Foliage::Point p) const
 {
-	#ifdef SCREEN_VERTICAL
-	return _pixels[_size.h - 1 - p.x + p.y * _size.h];
+	#ifdef REARRANGE_SURFACES
+		return _pixels[_size.h - 1 - p.x + p.y * _size.h];
 	#else
-	return _pixels[p.y * _size.w + p.x];
+		return _pixels[p.y * _size.w + p.x];
 	#endif
 }
 
 void Foliage::Surface::setPixel(const Foliage::Point p, const Foliage::Color color)
 {
-	#ifdef SCREEN_VERTICAL
-	_pixels[_size.h - 1 - p.x + p.y * _size.h] = color;
+	#ifdef REARRANGE_SURFACES
+		_pixels[_size.h - 1 - p.x + p.y * _size.h] = color;
 	#else
-	_pixels[p.y * _size.w + p.x] = color;
+		_pixels[p.y * _size.w + p.x] = color;
 	#endif
 }
 
 void Foliage::Surface::drawAt(const Foliage::Point p) const
 {
-	if (_instancized != -1)
-	{
-		// try to use ivga
-		bool ok = Foliage::Screen::instancizeSurface(this, p);
-		if (!ok)
+	#ifdef __PPC__
+		if (_instancized != -1)
+		{
+			// try to use ivga
+			bool ok = Foliage::Screen::instancizeSurface(this, p);
+			if (!ok)
+			{
+				// use isprite
+				Foliage::Screen::blitSurface(this, p);
+			}
+		}
+		else if (_size.h <= 64 && _size.w <= 64)
 		{
 			// use isprite
 			Foliage::Screen::blitSurface(this, p);
 		}
-	}
-	else if (_size.h <= 64 && _size.w <= 64)
-	{
-		// use isprite
+		else
+		{
+			// draw manually (sloooooow!)
+			Foliage::Screen::drawSurface(this, p);
+		}
+	#else
 		Foliage::Screen::blitSurface(this, p);
-	}
-	else
-	{
-		// draw manually (sloooooow!)
-		Foliage::Screen::drawSurface(this, p);
-	}
-}
-	
-Foliage::Size Foliage::Surface::getSize() const
-{
-	return _size;
+	#endif
 }
 
 typedef struct BMP_HEADER
@@ -95,19 +105,32 @@ typedef struct BMP_INFOHEADER
 } INFOHEADER;
 
 // reads two bytes from file
-inline Uint16 ReadUShort(SYSACE_FILE *fptr)
+inline Uint16 ReadUShort(FILE *fptr)
 {
 	Uint8 readBuffer[2];
-	sysace_fread(readBuffer, 1, 2, fptr);
+	fread(readBuffer, 1, 2, fptr);
 	return ((readBuffer[1] << 8) | readBuffer[0]);
 }
 
 // reads four bytes from file in little endian order
-inline Uint32 ReadUIntLil(SYSACE_FILE *fptr)
+inline Uint32 ReadUIntLil(FILE *fptr)
 {
 	Uint8 readBuffer[4];	
-	sysace_fread(readBuffer, 1, 4, fptr);
+	fread(readBuffer, 1, 4, fptr);
 	return ((((((readBuffer[3] << 8) | readBuffer[2]) << 8) | readBuffer[1]) << 8) | readBuffer[0]);
+}
+
+inline Foliage::Color create_color_from_truecolor(Uint32 truecolor)
+{
+	Foliage::Color color;
+	Uint32 r = (truecolor >> 16) & 0xff;
+	Uint32 g = (truecolor >> 8) & 0xff;
+	Uint32 b = truecolor & 0xff;
+	r >>= 3;
+	g >>= 2;
+	b >>= 3;
+	color = (r << 11) | (g << 5) | b;
+	return color;
 }
 
 inline void PadToNextMultipleOfFour(Sint32 &val)
@@ -128,11 +151,18 @@ inline void PadToNextMultipleOfFour(Sint32 &val)
 
 Foliage::Surface *Foliage::Surface::readBMP(const std::string &filename)
 {
-	SYSACE_FILE *infile = sysace_fopen(filename.c_str(), "r");
+	FILE *infile;
+	#ifdef __PPC__
+		infile = fopen(filename.c_str(), "r");
+	#else
+		std::string filename2 = "../game/resources/" + filename;
+		infile = fopen(filename2.c_str(), "r");
+	#endif
+
 	if (infile == NULL)
 	{
 		std::cout << "Could not open file " << filename << std::endl;
-		return NULL;
+		exit(1);
 	}
 	
 	// Read check the headers
@@ -165,10 +195,10 @@ Foliage::Surface *Foliage::Surface::readBMP(const std::string &filename)
 	// Compute line (or column) padding on 4 pixels (due to 64-bit PLB)
 	Sint32 width = infoheader.width;
 	Sint32 height = infoheader.height;
-	#ifdef SCREEN_VERTICAL
-	PadToNextMultipleOfFour(height);
+	#ifdef REARRANGE_SURFACES
+		PadToNextMultipleOfFour(height);
 	#else
-	PadToNextMultipleOfFour(width);
+		PadToNextMultipleOfFour(width);
 	#endif
 
 	// Allocate surface memory
@@ -176,7 +206,7 @@ Foliage::Surface *Foliage::Surface::readBMP(const std::string &filename)
 	if (baseaddr == NULL)
 	{
 		std::cout << "Not enough memory." << std::endl;
-		sysace_fclose(infile);
+		fclose(infile);
 		return NULL;
 	}
 
@@ -186,51 +216,53 @@ Foliage::Surface *Foliage::Surface::readBMP(const std::string &filename)
 	PadToNextMultipleOfFour(linewidth);
 	for (Sint32 j = infoheader.height - 1; j >= 0; j--)
 	{
-		sysace_fread(readBuffer, 1, linewidth, infile);
+		fread(readBuffer, 1, linewidth, infile);
 		for (Sint32 i = 0; i < infoheader.width; i++)
 		{
 			Uint32 temp = ((((readBuffer[i*3+2] << 8) | readBuffer[(i*3)+1]) << 8) | readBuffer[(i*3)]);
 			Color *writeaddr = baseaddr;
-			#ifdef SCREEN_VERTICAL
-			// If TATE mode, transform the line data to column data
-			writeaddr += (i * height + (height - 1 - j));
+			#ifdef REARRANGE_SURFACES
+				// If TATE mode, transform the line data to column data
+				writeaddr += (i * height + (height - 1 - j));
 			#else
-			writeaddr += (j * width + i);
+				writeaddr += (j * width + i);
 			#endif
-			*writeaddr = ivga_create_color_from_truecolor(temp);
+			*writeaddr = create_color_from_truecolor(temp);
 		}
 	}
-	sysace_fclose(infile);
+	fclose(infile);
 	
 	// Add transparent padding
-	#ifdef SCREEN_VERTICAL
-	for (Sint32 j = infoheader.height; j < height; j++)
-	{
-		for (Sint32 i = 0; i < infoheader.width; i++)
+	#ifdef REARRANGE_SURFACES
+		for (Sint32 j = infoheader.height; j < height; j++)
 		{
-			Color *writeaddr = baseaddr;
-			writeaddr += (i * height + (height - 1 - j));
-			*writeaddr = Foliage::Colors::Transparent;
+			for (Sint32 i = 0; i < infoheader.width; i++)
+			{
+				Color *writeaddr = baseaddr;
+				writeaddr += (i * height + (height - 1 - j));
+				*writeaddr = Foliage::Colors::Transparent;
+			}
 		}
-	}
 	#else
-	for (Sint32 j = 0; j < height; j++)
-	{
-		for (Sint32 i = infoheader.width; i < width; i++)
+		for (Sint32 j = 0; j < height; j++)
 		{
-			Color *writeaddr = baseaddr;
-			writeaddr += (j * infoheader.width + i);
-			*writeaddr = Foliage::Colors::Transparent;
+			for (Sint32 i = infoheader.width; i < width; i++)
+			{
+				Color *writeaddr = baseaddr;
+				writeaddr += (j * infoheader.width + i);
+				*writeaddr = Foliage::Colors::Transparent;
+			}
 		}
-	}
 	#endif
 		
 	// Flush processor cache
 	Foliage::flushDCache();
-	
+
 	// Allocates and create the surface
 	return new(Foliage::Eternal) Surface(Foliage::Surface(Foliage::Size(width, height), baseaddr, filename));
 }
+
+#ifdef __PPC__
 
 Foliage::Surface *Foliage::Surface::createNewShiftedSurface(const Sint32 shift) const
 {
@@ -243,7 +275,7 @@ Foliage::Surface *Foliage::Surface::createNewShiftedSurface(const Sint32 shift) 
 	}
 	
 	// Compute the shifted surface
-	#ifdef SCREEN_VERTICAL
+	#ifdef REARRANGE_SURFACES
 	for (Sint32 j = shift; j < _size.h; j++)
 	{
 		for (Sint32 i = 0; i < _size.w; i++)
@@ -274,3 +306,5 @@ Foliage::Surface *Foliage::Surface::createNewShiftedSurface(const Sint32 shift) 
 	newname += ('0' + shift);
 	return new(Foliage::Eternal) Foliage::Surface(_size, baseaddr, newname);
 }
+
+#endif
