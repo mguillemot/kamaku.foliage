@@ -4,7 +4,6 @@
 #ifdef __PPC__
 
 Foliage::PoolAllocator<Uint8, Foliage::EternalPool> eternalAlloc;
-Foliage::PoolAllocator<Uint8, Foliage::GamePool> gameAlloc;
 Foliage::PoolAllocator<Uint8, Foliage::LevelPool> levelAlloc;
 
 #endif
@@ -43,8 +42,6 @@ void* operator new(std::size_t sz, const Foliage::MemoryPersistance pool) throw 
 	#ifdef __PPC__
 		switch (pool)
 		{
-			case Foliage::Game:
-				return (void *)gameAlloc.allocate(sz);
 			case Foliage::Level:
 				return (void *)levelAlloc.allocate(sz);
 			default:
@@ -67,8 +64,6 @@ void* operator new[](std::size_t sz, const Foliage::MemoryPersistance pool) thro
 	#ifdef __PPC__
 		switch (pool)
 		{
-			case Foliage::Game:
-				return (void *)gameAlloc.allocate(sz);
 			case Foliage::Level:
 				return (void *)levelAlloc.allocate(sz);
 			default:

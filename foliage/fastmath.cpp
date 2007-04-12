@@ -20,7 +20,7 @@
 
 Foliage::Fixed Foliage::FastMath::cos(const Foliage::Fixed x)
 {
-	if (x < 0)
+	if (x < Sint16(0))
 	{
 		return cos(x.opposite());
 	}	
@@ -38,7 +38,7 @@ Foliage::Fixed Foliage::FastMath::cos(const Foliage::Fixed x)
 	}
 	Fixed x2(x);
 	x2 *= F_2000_OVER_PI;
-	Sint32 i = int(x2);
+	Sint16 i = Sint16(x2);
 	return Foliage::FastMath::cos_t[i];
 }
 
@@ -49,7 +49,7 @@ Foliage::Fixed Foliage::FastMath::sin(const Foliage::Fixed x)
 
 Foliage::Fixed Foliage::FastMath::atan(const Foliage::Fixed x)
 {
-	if (x < 0)
+	if (x < Sint16(0))
 	{
 		return atan(x.opposite()).opposite();
 	}

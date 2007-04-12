@@ -171,31 +171,23 @@ void start()
 		while (enn != enemies.end())
 		{
 			Enemy *e = *enn;
-			if (e->getKilled())
+			e->getSprite()->move();
+			if (e->getKilled() || e->getSprite()->outOfScreen())
 			{
 				delete e;
 				enn = enemies.erase(enn);
 			}
 			else
 			{
-				e->getSprite()->move();
-				if (e->getSprite()->getPosition().y >= Screen::Height) // go out the bottom part
-				{
-					delete e;
-					enn = enemies.erase(enn);
-				}
-				else
-				{
-					e->update();
-					++enn;
-				}
+				e->update();
+				++enn;
 			}
 		}
 		if (fireShot)
 		{
-			Bullet *b1 = new Bullet(ship.getCenter(), F_3_PI_2, Fixed(20), 2);
-			Bullet *b2 = new Bullet(ship.getCenter(), F_3_PI_2 + F_0_DOT_1, Fixed(20), 2);
-			Bullet *b3 = new Bullet(ship.getCenter(), F_3_PI_2 - F_0_DOT_1, Fixed(20), 2);
+			Bullet *b1 = new Bullet(ship.getCenter(), F_3_PI_2, Fixed(Sint16(20)), 2);
+			Bullet *b2 = new Bullet(ship.getCenter(), F_3_PI_2 + F_0_DOT_1, Fixed(Sint16(20)), 2);
+			Bullet *b3 = new Bullet(ship.getCenter(), F_3_PI_2 - F_0_DOT_1, Fixed(Sint16(20)), 2);
 			myBullets.push_back(b1);
 			myBullets.push_back(b2);
 			myBullets.push_back(b3);
@@ -237,13 +229,16 @@ void start()
 				c = Black;
 			}
 			Enemy *e = new Enemy(c);
-			Sint32 sx = (rand() % 3) - 1;
-			Sint32 sy = (rand() % 7) - 3;
-			e->getSprite()->setPosition(Point((rand() % 150) + 45, -50));
+			Sint16 sx = (rand() % 3) - 1;
+			Sint16 sy = (rand() % 4) + 1;
+			e->getSprite()->setPosition(Point((rand() % 150) + 1 - e->getSprite()->getSize().h, 0));
 			e->getSprite()->setSpeed(Speed(Fixed(sx), Fixed(sy)));
 			enemies.push_back(e);
 		}
 		waitEndOfBg();
+		
+		// BEGIN DRAWING SPRITES NOW!
+		
 		string frame_nb = "frame #";
 		append_string(frame_nb, frame);
 		string bullets_nb;
@@ -254,9 +249,9 @@ void start()
 		string randlevel_nb = "level ";
 		append_string(randlevel_nb, randlevel);
 		ship.draw();
-		for (ListEnemy::const_iterator enn = enemies.begin(); enn != enemies.end(); ++enn)
+		for (ListEnemy::const_iterator ennn = enemies.begin(); ennn != enemies.end(); ++ennn)
 		{
-			(*enn)->getSprite()->draw();
+			(*ennn)->getSprite()->draw();
 		}
 		const Rect shipHb = ship.getScreenHitbox();
 		ListBullet::iterator i = enemyBullets.begin();
@@ -266,8 +261,8 @@ void start()
 			b->update();
 			if (b->getSprite()->outOfScreen())
 			{
-				i = enemyBullets.erase(i);
 				delete b;
+				i = enemyBullets.erase(i);
 			}
 			else
 			{
@@ -275,8 +270,8 @@ void start()
 				Rect bHb = b->getSprite()->getScreenHitbox();
 				if (Rect::intersects(shipHb, bHb))
 				{
-					i = enemyBullets.erase(i);
 					delete b;
+					i = enemyBullets.erase(i);
 					hitCount++;
 				}
 				else
@@ -322,11 +317,13 @@ void start()
 		font.drawString(bullets_nb, Point(0, 17));
 		font.drawString(frameskip_nb, Point(0, 34));
 		font.drawString(randlevel_nb, Point(0, 51));
+		/*
 		if ((frame % 1000) == 0)
 		{
 			cout << enemyBullets.size() << " bullets!" << endl;
 			printMemoryUsage();
 		}
+		*/
 		if (frame % 300 == 0)
 		{
 			//SoundManager::playSfx(&hit);

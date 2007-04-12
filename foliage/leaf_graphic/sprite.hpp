@@ -41,7 +41,7 @@ namespace Foliage
 		Fixed _x, _y;
 		Speed _s;
 		std::list<Surface *> _frames;
-		std::list<Surface *>::iterator _currentFrame;
+		std::list<Surface *>::const_iterator _currentFrame;
 		Rect _hitbox;
 	};
 

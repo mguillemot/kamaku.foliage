@@ -36,8 +36,8 @@ Foliage::Sprite::~Sprite()
 Foliage::Rect Foliage::Sprite::getScreenHitbox() const
 {
 	Rect screenHitbox = _hitbox;
-	screenHitbox.x += int(_x);
-	screenHitbox.y += int(_y);
+	screenHitbox.x += Sint16(_x);
+	screenHitbox.y += Sint16(_y);
 	return screenHitbox;	
 }
 
@@ -48,7 +48,10 @@ void Foliage::Sprite::setHitbox(const Foliage::Rect &hitbox)
 
 void Foliage::Sprite::draw() const
 {
-	(*_currentFrame)->drawAt(getPosition());
+	//if (!outOfScreen())
+	{
+		(*_currentFrame)->drawAt(getPosition());
+	}
 	//Screen::drawRect(getScreenHitbox(), Foliage::Colors::Yellow);
 }
 
@@ -60,7 +63,7 @@ void Foliage::Sprite::setPosition(const Foliage::Point p)
 
 Foliage::Point Foliage::Sprite::getPosition() const
 {
-	return Foliage::Point(int(_x), int(_y));
+	return Foliage::Point(Sint16(_x), Sint16(_y));
 }
 
 Foliage::Point Foliage::Sprite::getCenter() const
@@ -86,7 +89,7 @@ void Foliage::Sprite::move()
 {
 	_x += _s.x;
 	_y += _s.y;
-	_currentFrame++;
+	++_currentFrame;
 	if (_currentFrame == _frames.end())
 	{
 		_currentFrame = _frames.begin();

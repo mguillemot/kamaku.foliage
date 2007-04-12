@@ -10,7 +10,7 @@ class Enemy
 {
 public:
     Enemy(const GameColor c = None);
-    ~Enemy();
+    virtual ~Enemy();
     virtual void update(); // = 0
 	Bullet      *fireAt(const Foliage::Point p, const Foliage::Fixed speed, const Foliage::Fixed shift_angle, const Sint32 bulletType) const;
 	Foliage::Sprite *getSprite() const { return _sprite; }

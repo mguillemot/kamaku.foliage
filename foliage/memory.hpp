@@ -17,18 +17,10 @@ namespace Foliage
 		static Uint32 current;
 	};
 	
-	class GamePool // (32 MB)
+	class LevelPool // (64 MB)
 	{
 	public:
 		static const Uint32 start = 0x0c000000;
-		static const Uint32 end = 0x0dffffff;
-		static Uint32 current;
-	};
-	
-	class LevelPool // (32 MB)
-	{
-	public:
-		static const Uint32 start = 0x0e000000;
 		static const Uint32 end = 0x0fffffff;
 		static Uint32 current;
 	};
@@ -157,7 +149,7 @@ namespace Foliage
 
 	void printMemoryUsage();
 
-	enum MemoryPersistance { Eternal, Game, Level };
+	enum MemoryPersistance { Eternal, Level };
 
 }
 

@@ -18,7 +18,7 @@ foliage/leaf_sound/sound.cpp \
 game/start.cpp \
 game/bullet.cpp \
 game/font.cpp \
-game/star.cpp 
+game/enemy.cpp 
 
 all: boot.me
 
@@ -29,8 +29,8 @@ boot.me: executable.elf
 	powerpc-eabi-objcopy -O srec executable.elf boot.me
 
 executable.elf: $(SRC) 
-	powerpc-eabi-gcc -O3 $(SRC) -o executable.elf -I../ppc405_0/include/ -I./foliage/ \
-	  -L../ppc405_0/lib/ -lxil -lstdc++ -pipe -Wall -Wl,-T -Wl,foliage_linker_script.ld -Wl,-O -Wl,-S -Wl,--gc-sections
+	powerpc-eabi-gcc -O3 $(SRC) -o executable.elf -I./ppc405_0/include/ -I./foliage/ \
+	  -L./ppc405_0/lib/ -lxil -lstdc++ -pipe -Wall -Wl,-T -Wl,foliage_linker_script.ld -Wl,-O -Wl,-S -Wl,--gc-sections
 	@echo ===================================================================
 	@powerpc-eabi-size executable.elf
 	@echo ===================================================================

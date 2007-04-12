@@ -6,6 +6,12 @@
 
 #ifdef __PPC__
 	#include <xbasic_types.h>
+	typedef Xuint8   Uint8;
+	typedef Xint8    Sint8;
+	typedef Xuint16  Uint16;
+	typedef Xint16   Sint16;
+	typedef Xuint32  Uint32;
+	typedef Xint32   Sint32;
 #else
 	#include <SDL.h>
 #endif
@@ -51,50 +57,49 @@ namespace Foliage
 	public:
 		Fixed() : v(0) { }
 		Fixed(const Fixed &fix) : v(fix.v) { }
-		//explicit Fixed(const int i) { v = i << 16; }
-		explicit Fixed(const Sint32 i) { v = i << 16; }
+		explicit Fixed(const Sint16 i) { v = i << 16; }
 		explicit Fixed(const float f) { v = (Sint32)((f + FLOAT_RESOLUTIONf) * FIXED_RESOLUTIONf); }
-		Fixed(const bool internal, Sint32 v) : v(v) { }
+		Fixed(const bool internal, const Sint32 v) : v(v) { }
 		~Fixed() { }
 		
 		Fixed & operator=(const Fixed &fix) { v = fix.v; return *this; }
-		Fixed & operator=(const int i) { v = i << 16; return *this; }
+		Fixed & operator=(const Sint16 i) { v = i << 16; return *this; }
 		Fixed & operator=(const float f) { v = (Sint32)std::floor((f + FLOAT_RESOLUTIONf) * FIXED_RESOLUTIONf); return *this; }
 
 		Fixed & operator+=(const Fixed &fix) { v += fix.v; return *this; }
-		Fixed & operator+=(const int i) { v += i << 16; return *this; }
+		Fixed & operator+=(const Sint16 i) { v += i << 16; return *this; }
 		Fixed & operator-=(const Fixed &fix) { v -= fix.v; return *this; }
-		Fixed & operator-=(const int i) { v -= i << 16; return *this; }
+		Fixed & operator-=(const Sint16 i) { v -= i << 16; return *this; }
 		Fixed & operator*=(const Fixed &fix) { v = mul32x32(v, fix.v); return *this; }
-		Fixed & operator*=(const int i)	{ v *= i; return *this; }
+		Fixed & operator*=(const Sint16 i)	{ v *= i; return *this; }
 		Fixed & operator/=(const Fixed &fix) { v = div32x32(v, fix.v); return *this; }
-		Fixed & operator/=(const int i)	{ v /= i; return *this; }
+		Fixed & operator/=(const Sint16 i)	{ v /= i; return *this; }
 		
 		const Fixed operator+(const Fixed &fix) const { return Fixed(*this) += fix; }
-		const Fixed operator+(const int i) const { return Fixed(*this) += i; }
+		const Fixed operator+(const Sint16 i) const { return Fixed(*this) += i; }
 		const Fixed operator-(const Fixed &fix) const { return Fixed(*this) -= fix; }
-		const Fixed operator-(const int i) const { return Fixed(*this) -= i; }
+		const Fixed operator-(const Sint16 i) const { return Fixed(*this) -= i; }
 		const Fixed operator*(const Fixed &fix) const { return Fixed(*this) *= fix; }
-		const Fixed operator*(const int i) const { return Fixed(*this) *= i; }
+		const Fixed operator*(const Sint16 i) const { return Fixed(*this) *= i; }
 		const Fixed operator/(const Fixed &fix) const { return Fixed(*this) /= fix; }
-		const Fixed operator/(const int i) const { return Fixed(*this) /= i; }
+		const Fixed operator/(const Sint16 i) const { return Fixed(*this) /= i; }
 		
 		const Fixed opposite() const { return Fixed(true, -v); }
 		
 		bool operator<(const Fixed &fix) const { return (v < fix.v); }
-		bool operator<(const int i) const { return (v < (i << 16)); }
+		bool operator<(const Sint16 i) const { return (v < (i << 16)); }
 		bool operator>(const Fixed &fix) const { return (v > fix.v); }
-		bool operator>(const int i) const { return (v > (i << 16)); }
+		bool operator>(const Sint16 i) const { return (v > (i << 16)); }
 		bool operator<=(const Fixed &fix) const { return (v <= fix.v); }
-		bool operator<=(const int i) const { return (v <= (i << 16)); }
+		bool operator<=(const Sint16 i) const { return (v <= (i << 16)); }
 		bool operator>=(const Fixed &fix) const { return (v >= fix.v); }
-		bool operator>=(const int i) const { return (v >= (i << 16)); }
+		bool operator>=(const Sint16 i) const { return (v >= (i << 16)); }
 		bool operator==(const Fixed &fix) const { return (v == fix.v); }
-		bool operator==(const int i) const { return (v == (i << 16)); }
+		bool operator==(const Sint16 i) const { return (v == (i << 16)); }
 		bool operator!=(const Fixed &fix) const { return (v != fix.v); }
-		bool operator!=(const int i) const { return (v != (i << 16)); }
+		bool operator!=(const Sint16 i) const { return (v != (i << 16)); }
 
-		operator int() const { return (v >> 16); }
+		operator Sint16() const { return (v >> 16); }
 		operator float() const { return (float(v) / FIXED_RESOLUTIONf); }
 		
 		friend std::ostream & operator<<(std::ostream &s, const Fixed &fix);

@@ -8,13 +8,13 @@ std::vector<Foliage::Surface *> Bullet::_bulletSurfaces(NB_BULLET_TYPES);
 
 void Bullet::loadBulletSurfaces()
 {
-	_bulletSurfaces[0] = Foliage::BitmapLoader::loadBitmap("bullet.bmp");
+	_bulletSurfaces[0] = Foliage::BitmapLoader::loadBitmap("bul.bmp");
 	Foliage::Instancizator::instancize(_bulletSurfaces[0]);
-	_bulletSurfaces[1] = Foliage::BitmapLoader::loadBitmap("boulette_rouge.bmp");
+	_bulletSurfaces[1] = Foliage::BitmapLoader::loadBitmap("bul_red.bmp");
 	Foliage::Instancizator::instancize(_bulletSurfaces[1]);
-	_bulletSurfaces[2] = Foliage::BitmapLoader::loadBitmap("boulette_bleue.bmp");
+	_bulletSurfaces[2] = Foliage::BitmapLoader::loadBitmap("bul_blue.bmp");
 	Foliage::Instancizator::instancize(_bulletSurfaces[2]);
-	_bulletSurfaces[3] = Foliage::BitmapLoader::loadBitmap("boulette_verte.bmp");
+	_bulletSurfaces[3] = Foliage::BitmapLoader::loadBitmap("bul_gree.bmp");
 	Foliage::Instancizator::instancize(_bulletSurfaces[3]);
 }
 

@@ -8,7 +8,15 @@
 namespace Foliage
 {
 
-	typedef std::map<const std::string, Surface*> StringMap;
+	struct ltstr
+	{
+		bool operator()(const char* s1, const char* s2) const
+		{
+			return strcmp(s1, s2) < 0;
+		}
+	};
+
+	typedef std::map<const char*, Surface*, ltstr> SurfaceMap;
 
 	class BitmapLoader
 	{
@@ -16,7 +24,7 @@ namespace Foliage
 		static Surface *loadBitmap(const std::string &bitmap);
 	
 	private:
-		static StringMap surfaces;
+		static SurfaceMap surfaces;
 	};	
 	
 }

@@ -281,14 +281,14 @@ void Foliage::Screen::fillRect(const Foliage::Rect r, const Foliage::Color color
 		s.y = r.y;
 		s.h = r.h;
 		s.w = r.w;
-		SDL_FillRect(_screen, &s, color); //TODO: correct color
+		SDL_FillRect(_screen, &s, color);
 	#endif
 }
 
 void Foliage::Screen::blitSurface(const Foliage::Surface *surf, const Foliage::Point pos)
 {
 	#ifdef __PPC__
-		const Uint32 sprite_addr = (Uint32)surf->getPixels();
+		const Uint32 sprite_addr = Uint32(surf->getPixels());
 		const Foliage::Size sprite_size = surf->getSize();
 		// read...
 		if (_sprite_currenly_loaded != sprite_addr)
@@ -324,9 +324,10 @@ void Foliage::Screen::blitSurface(const Foliage::Surface *surf, const Foliage::P
 
 void Foliage::Screen::drawSurface(const Foliage::Surface *surf, const Foliage::Point pos)
 {
-	for (Sint16 j = 0; j < surf->getSize().h; j++)
+	const Foliage::Size s = surf->getSize();
+	for (Sint16 j = 0; j < s.h; j++)
 	{
-		for (Sint16 i = 0; i < surf->getSize().w; i++)
+		for (Sint16 i = 0; i < s.w; i++)
 		{
 			
 			Foliage::Color color = surf->getPixel(Foliage::Point(i, j));

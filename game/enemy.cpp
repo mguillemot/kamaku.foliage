@@ -7,43 +7,43 @@
 extern Foliage::Sprite *playerShip;
 extern ListBullet enemyBullets;
 
-Enemy::Enemy(const GameColor c) : _color(c), _killed(false), _killedTime(0), _life(100)
+Enemy::Enemy(const GameColor c)
 {
+	_color = c;
+	_killed = false;
+	_killedTime = 0;
+	_life = 100;
 	switch (c)
 	{
-	case None:
-		_sprite = new Foliage::Sprite("ennemi.bmp");
-		break;
 	case Red:
-		_sprite = new Foliage::Sprite("ennemi_rouge.bmp");
+		_sprite = new Foliage::Sprite("e_red.bmp");
 		break;
 	case Green:
-		_sprite = new Foliage::Sprite("ennemi_vert.bmp");
+		_sprite = new Foliage::Sprite("e_green.bmp");
 		break;
 	case Blue:
-		_sprite = new Foliage::Sprite("ennemi_bleu.bmp");
+		_sprite = new Foliage::Sprite("e_blue.bmp");
 		break;
 	case Yellow:
-		_sprite = new Foliage::Sprite("ennemi_jaune.bmp");
+		_sprite = new Foliage::Sprite("e_yellow.bmp");
 		break;
 	case Purple:
-		_sprite = new Foliage::Sprite("ennemi_violet.bmp");
+		_sprite = new Foliage::Sprite("e_purple.bmp");
 		break;
 	case Lightblue:
-		_sprite = new Foliage::Sprite("ennemi_bleuciel.bmp");
+		_sprite = new Foliage::Sprite("e_lblue.bmp");
 		break;
 	case Black:
-		_sprite = new Foliage::Sprite("ennemi_noir.bmp");
+		_sprite = new Foliage::Sprite("e_black.bmp");
 		break;
 	case White:
-		_sprite = new Foliage::Sprite("ennemi_blanc.bmp");
+		_sprite = new Foliage::Sprite("e_white.bmp");
+		break;
+	default:
+		_sprite = new Foliage::Sprite("ennemi.bmp");
 		break;
 	}
-	Foliage::Rect hitbox;
-	hitbox.x = 4;
-	hitbox.y = 13;
-	hitbox.w = 30;
-	hitbox.h = 15;
+	const Foliage::Rect hitbox(4, 13, 30, 15);
     _sprite->setHitbox(hitbox);
     _turret = _sprite->getCenter();
 }
@@ -64,8 +64,8 @@ Bullet *Enemy::fireAt(const Foliage::Point p, const Foliage::Fixed speed, const 
     }
     else
     {
-        const Sint32 dx = p.x - from.x;
-        const Sint32 dy = p.y - from.y;
+        const Sint16 dx = p.x - from.x;
+        const Sint16 dy = p.y - from.y;
         if (dx != 0)
         {
 			angle = Foliage::FastMath::atan(Foliage::Fixed(dy) / Foliage::Fixed(dx));
@@ -117,9 +117,9 @@ void Enemy::update()
         {
             //_fireCount = 0;
             //float speed = 10.0f + (float)_difficulty / 5;
-			fireAt(playerShip->getCenter(), Foliage::Fixed(10), F_0, 0);
-			fireAt(playerShip->getCenter(), Foliage::Fixed(10), Foliage::Fixed(0.2f), 1);
-			fireAt(playerShip->getCenter(), Foliage::Fixed(10), Foliage::Fixed(-0.2f), 1);
+			fireAt(playerShip->getCenter(), Foliage::Fixed(Sint16(10)), F_0, 0);
+			fireAt(playerShip->getCenter(), Foliage::Fixed(Sint16(10)), Foliage::Fixed(0.2f), 1);
+			fireAt(playerShip->getCenter(), Foliage::Fixed(Sint16(10)), Foliage::Fixed(-0.2f), 1);
         }
     }
 }

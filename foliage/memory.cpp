@@ -5,7 +5,6 @@
 #ifdef __PPC__
 
 Uint32 Foliage::EternalPool::current = Foliage::EternalPool::start;
-Uint32 Foliage::GamePool::current = Foliage::GamePool::start;
 Uint32 Foliage::LevelPool::current = Foliage::LevelPool::start;
 
 template <class Pool>
@@ -22,9 +21,6 @@ void Foliage::printMemoryUsage()
 	std::cout << "Memory usage:" << std::endl;
 	std::cout << " * eternal: ";
 	printPoolUsage<EternalPool>();
-	std::cout << std::endl;
-	std::cout << " * game: ";
-	printPoolUsage<GamePool>();
 	std::cout << std::endl;
 	std::cout << " * level: ";
 	printPoolUsage<LevelPool>();

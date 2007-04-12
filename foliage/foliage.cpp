@@ -70,7 +70,6 @@ void Foliage::init()
 		XExc_mEnableExceptions(XEXC_NON_CRITICAL);
 		std::cout << "FOLIAGE: interrupts activated." << std::endl;
 	#endif
-	
 	std::cout << "FOLIAGE: ready!" << std::endl << std::endl;
 }
 

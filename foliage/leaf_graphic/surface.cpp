@@ -19,8 +19,10 @@
 #endif
 
 Foliage::Surface::Surface(const Foliage::Size s, Foliage::Color *pixels, const std::string &name) 
-	: _size(s), _pixels(pixels), _name(name)
+	: _size(s)
 {
+	_name = name;
+	_pixels = pixels;
 	#ifdef __PPC__
 		_instancized = -1;
 	#else
@@ -40,7 +42,7 @@ Foliage::Surface::~Surface()
 Foliage::Color Foliage::Surface::getPixel(const Foliage::Point p) const
 {
 	#ifdef REARRANGE_SURFACES
-		return _pixels[_size.h - 1 - p.x + p.y * _size.h];
+		return _pixels[p.x * _size.h + _size.h - 1 - p.y];
 	#else
 		return _pixels[p.y * _size.w + p.x];
 	#endif
@@ -49,7 +51,7 @@ Foliage::Color Foliage::Surface::getPixel(const Foliage::Point p) const
 void Foliage::Surface::setPixel(const Foliage::Point p, const Foliage::Color color)
 {
 	#ifdef REARRANGE_SURFACES
-		_pixels[_size.h - 1 - p.x + p.y * _size.h] = color;
+		_pixels[p.x * _size.h + _size.h - 1 - p.y] = color;
 	#else
 		_pixels[p.y * _size.w + p.x] = color;
 	#endif
@@ -68,7 +70,7 @@ void Foliage::Surface::drawAt(const Foliage::Point p) const
 				Foliage::Screen::blitSurface(this, p);
 			}
 		}
-		else if (_size.h <= 64 && _size.w <= 64)
+		else if (_size.h <= 64 && _size.w <= 64 && p.x >= 0)
 		{
 			// use isprite
 			Foliage::Screen::blitSurface(this, p);
@@ -152,7 +154,7 @@ Foliage::Surface *Foliage::Surface::readBMP(const std::string &filename)
 {
 	FILE *infile;
 	#ifdef __PPC__
-		infile = fopen(filename.c_str(), "rb");
+		infile = fopen(filename.c_str(), "r");
 	#else
 		std::string filename2 = "../game/resources/" + filename;
 		infile = fopen(filename2.c_str(), "rb");
@@ -215,7 +217,12 @@ Foliage::Surface *Foliage::Surface::readBMP(const std::string &filename)
 	PadToNextMultipleOfFour(linewidth);
 	for (Sint32 j = infoheader.height - 1; j >= 0; j--)
 	{
-		int r = fread(readBuffer, 1, linewidth, infile);
+		Sint32 r = fread(readBuffer, 1, linewidth, infile);
+		if (r != linewidth)
+		{
+			std::cout << "Corrupt file: " << filename << std::endl;
+			exit(1);
+		}
 		for (Sint32 i = 0; i < infoheader.width; i++)
 		{
 			Uint32 temp = ((((readBuffer[i * 3 + 2] << 8) | readBuffer[i * 3 + 1]) << 8) | readBuffer[i * 3]);
