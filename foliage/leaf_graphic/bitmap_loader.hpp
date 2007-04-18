@@ -2,7 +2,7 @@
 #define _FOLIAGE__BITMAP_LOADER
 
 #include <string>
-#include <map>
+#include <hash_map>
 #include "surface.hpp"
 
 namespace Foliage
@@ -16,7 +16,7 @@ namespace Foliage
 		}
 	};
 
-	typedef std::map<const char*, Surface*, ltstr> SurfaceMap;
+	typedef stdext::hash_map<const std::string, Surface*> SurfaceDictionary;
 
 	class BitmapLoader
 	{
@@ -24,7 +24,7 @@ namespace Foliage
 		static Surface *loadBitmap(const std::string &bitmap);
 	
 	private:
-		static SurfaceMap surfaces;
+		static SurfaceDictionary surfaces;
 	};	
 	
 }

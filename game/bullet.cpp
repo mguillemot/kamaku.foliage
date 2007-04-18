@@ -2,7 +2,7 @@
 #include "bullet.hpp"
 #include "fastmath.hpp"
 
-#define NB_BULLET_TYPES     4
+#define NB_BULLET_TYPES 6
 
 std::vector<Foliage::Surface *> Bullet::_bulletSurfaces(NB_BULLET_TYPES);
 
@@ -16,6 +16,10 @@ void Bullet::loadBulletSurfaces()
 	Foliage::Instancizator::instancize(_bulletSurfaces[2]);
 	_bulletSurfaces[3] = Foliage::BitmapLoader::loadBitmap("bul_gree.bmp");
 	Foliage::Instancizator::instancize(_bulletSurfaces[3]);
+	_bulletSurfaces[4] = Foliage::BitmapLoader::loadBitmap("bullet0.bmp");
+	Foliage::Instancizator::instancize(_bulletSurfaces[4]);
+	_bulletSurfaces[5] = Foliage::BitmapLoader::loadBitmap("bullet1.bmp");
+	Foliage::Instancizator::instancize(_bulletSurfaces[5]);
 }
 
 Bullet::Bullet(const Foliage::Point position, const Foliage::Fixed direction, const Foliage::Fixed speed, const Sint32 type)
@@ -23,8 +27,18 @@ Bullet::Bullet(const Foliage::Point position, const Foliage::Fixed direction, co
 {
     _sprite = new Foliage::Sprite(_bulletSurfaces[type]);
     const Foliage::Size size = _sprite->getSize();
-    const Foliage::Rect bouletteHitbox = Foliage::Rect(2, 2, 4, 4);
-    _sprite->setHitbox(bouletteHitbox);
+	if (type >= 0 && type <= 3)
+	{
+		// enemy round bullet (8x8)
+		const Foliage::Rect bulletHitbox = Foliage::Rect(2, 2, 4, 4);
+		_sprite->setHitbox(bulletHitbox);
+	}
+	else
+	{
+		// my digital bullets (6x9)
+		const Foliage::Rect bulletHitbox = Foliage::Rect(0, 0, 6, 9);
+		_sprite->setHitbox(bulletHitbox);
+	}    
     _sprite->setPosition(Foliage::Point(position.x - (size.w >> 1), position.y - (size.h >> 1)));
     setSpeed(speed);
 }

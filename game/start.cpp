@@ -85,7 +85,7 @@ void start()
 	const Fixed ShipSpeed = Fixed(1.5f);
 	Sint32 hitCount = 0;
 	Sint32 randlevel = 10;
-	bool fireShot = false;
+	bool fireShot0 = false, fireShot1 = false;
 
 	//SoundManager::playBg(&bg);		
 	
@@ -115,7 +115,11 @@ void start()
 				}
 				else if (e.getButton() == BUTTON1)
 				{
-					fireShot = e.getPushed();
+					fireShot0 = e.getPushed();
+				}
+				else if (e.getButton() == BUTTON2)
+				{
+					fireShot1 = e.getPushed();
 				}
 			}
 			else // player 2
@@ -183,11 +187,20 @@ void start()
 				++enn;
 			}
 		}
-		if (fireShot)
+		if (fireShot0)
 		{
-			Bullet *b1 = new Bullet(ship.getCenter(), F_3_PI_2, Fixed(Sint16(20)), 2);
-			Bullet *b2 = new Bullet(ship.getCenter(), F_3_PI_2 + F_0_DOT_1, Fixed(Sint16(20)), 2);
-			Bullet *b3 = new Bullet(ship.getCenter(), F_3_PI_2 - F_0_DOT_1, Fixed(Sint16(20)), 2);
+			Bullet *b1 = new Bullet(ship.getCenter(), F_3_PI_2, Fixed(Sint16(20)), 4);
+			Bullet *b2 = new Bullet(ship.getCenter(), F_3_PI_2 + F_0_DOT_1, Fixed(Sint16(20)), 4);
+			Bullet *b3 = new Bullet(ship.getCenter(), F_3_PI_2 - F_0_DOT_1, Fixed(Sint16(20)), 4);
+			myBullets.push_back(b1);
+			myBullets.push_back(b2);
+			myBullets.push_back(b3);
+		}	
+		else if (fireShot1)
+		{
+			Bullet *b1 = new Bullet(ship.getCenter(), F_3_PI_2, Fixed(Sint16(20)), 5);
+			Bullet *b2 = new Bullet(ship.getCenter(), F_3_PI_2 + F_0_DOT_1, Fixed(Sint16(20)), 5);
+			Bullet *b3 = new Bullet(ship.getCenter(), F_3_PI_2 - F_0_DOT_1, Fixed(Sint16(20)), 5);
 			myBullets.push_back(b1);
 			myBullets.push_back(b2);
 			myBullets.push_back(b3);
@@ -235,10 +248,6 @@ void start()
 			e->getSprite()->setSpeed(Speed(Fixed(sx), Fixed(sy)));
 			enemies.push_back(e);
 		}
-		waitEndOfBg();
-		
-		// BEGIN DRAWING SPRITES NOW!
-		
 		string frame_nb = "frame #";
 		append_string(frame_nb, frame);
 		string bullets_nb;
@@ -248,8 +257,15 @@ void start()
 		append_string(frameskip_nb, skipped);
 		string randlevel_nb = "level ";
 		append_string(randlevel_nb, randlevel);
+		waitEndOfBg();
+		
+		// BEGIN DRAWING SPRITES NOW!
+		
 		ship.draw();
-		ship.drawHitbox(Colors::Green);
+		if (show_hitbox)
+		{
+			ship.drawHitbox(Colors::Green);
+		}
 		for (ListEnemy::const_iterator ennn = enemies.begin(); ennn != enemies.end(); ++ennn)
 		{
 			(*ennn)->getSprite()->draw();

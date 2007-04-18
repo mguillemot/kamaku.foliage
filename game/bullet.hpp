@@ -25,7 +25,7 @@ public:
 	static void      loadBulletSurfaces();
 
 private:
-    void updateSpriteSpeed();
+    void             updateSpriteSpeed();
 
     Foliage::Fixed   _direction;
     Foliage::Fixed   _speed;

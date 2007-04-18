@@ -232,31 +232,31 @@ void Foliage::InputManager::updateInnerQueue()
 		Sint32 player = 0;
 		switch (e.key.keysym.sym)
 		{
-		case SDLK_s:
+		case SDLK_a:
 			button = Foliage::LEFT;
 			player = 1;
 			break;
-		case SDLK_e:
+		case SDLK_w:
 			button = Foliage::UP;
 			player = 1;
 			break;
-		case SDLK_d:
+		case SDLK_s:
 			button = Foliage::DOWN;
 			player = 1;
 			break;
-		case SDLK_f:
+		case SDLK_d:
 			button = Foliage::RIGHT;
 			player = 1;
 			break;
-		case SDLK_j:
+		case SDLK_k:
 			button = Foliage::BUTTON1;
 			player = 1;
 			break;
-		case SDLK_k:
+		case SDLK_l:
 			button = Foliage::BUTTON2;
 			player = 1;
 			break;
-		case SDLK_l:
+		case SDLK_COLON:
 			button = Foliage::BUTTON3;
 			player = 1;
 			break;
@@ -267,6 +267,42 @@ void Foliage::InputManager::updateInnerQueue()
 		case SDLK_1:
 			button = Foliage::START;
 			player = 1;
+			break;
+		case SDLK_f:
+			button = Foliage::LEFT;
+			player = 2;
+			break;
+		case SDLK_t:
+			button = Foliage::UP;
+			player = 2;
+			break;
+		case SDLK_g:
+			button = Foliage::DOWN;
+			player = 2;
+			break;
+		case SDLK_h:
+			button = Foliage::RIGHT;
+			player = 2;
+			break;
+		case SDLK_i:
+			button = Foliage::BUTTON1;
+			player = 2;
+			break;
+		case SDLK_o:
+			button = Foliage::BUTTON2;
+			player = 2;
+			break;
+		case SDLK_p:
+			button = Foliage::BUTTON3;
+			player = 2;
+			break;
+		case SDLK_6:
+			button = Foliage::COIN;
+			player = 2;
+			break;
+		case SDLK_2:
+			button = Foliage::START;
+			player = 2;
 			break;
 		default:
 			continue;
