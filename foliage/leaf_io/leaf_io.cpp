@@ -296,5 +296,5 @@ Foliage::InputEvent Foliage::InputManager::nextEvent()
 Sint32 Foliage::InputManager::numberOfEvents()
 {
 	updateInnerQueue();
-	return _events.size();
+	return Sint32(_events.size());
 }

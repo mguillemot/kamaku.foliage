@@ -107,7 +107,7 @@ Foliage::Sound::Sound(const std::string filename)
 			Uint32 totalRead = 0;
 			while (totalRead < datachunk.subchunkSize)
 			{
-				Sint32 numRead = fread(readBuffer, 1, 2048, infile);
+				Sint32 numRead = Sint32(fread(readBuffer, 1, 2048, infile));
 				totalRead += numRead;
 				for (Sint32 i = 0; i < numRead; i += 4)
 				{

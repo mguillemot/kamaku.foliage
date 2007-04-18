@@ -21,6 +21,7 @@ namespace Foliage
 		// Instance methods
 		void  addFrame(const std::string &filename);
 		void  draw() const;
+		void  drawHitbox(const Color color) const;
 		void  move();
 		void  setPosition(const Point p);
 		Point getPosition() const;

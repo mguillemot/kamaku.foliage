@@ -217,7 +217,7 @@ Foliage::Surface *Foliage::Surface::readBMP(const std::string &filename)
 	PadToNextMultipleOfFour(linewidth);
 	for (Sint32 j = infoheader.height - 1; j >= 0; j--)
 	{
-		Sint32 r = fread(readBuffer, 1, linewidth, infile);
+		size_t r = fread(readBuffer, 1, linewidth, infile);
 		if (r != linewidth)
 		{
 			std::cout << "Corrupt file: " << filename << std::endl;

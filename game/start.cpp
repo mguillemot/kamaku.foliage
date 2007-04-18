@@ -242,13 +242,14 @@ void start()
 		string frame_nb = "frame #";
 		append_string(frame_nb, frame);
 		string bullets_nb;
-		append_string(bullets_nb, enemyBullets.size(), 4);
+		append_string(bullets_nb, Sint32(enemyBullets.size()), 4);
 		bullets_nb += " bullets";
 		string frameskip_nb = "frameskip ";
 		append_string(frameskip_nb, skipped);
 		string randlevel_nb = "level ";
 		append_string(randlevel_nb, randlevel);
 		ship.draw();
+		ship.drawHitbox(Colors::Green);
 		for (ListEnemy::const_iterator ennn = enemies.begin(); ennn != enemies.end(); ++ennn)
 		{
 			(*ennn)->getSprite()->draw();

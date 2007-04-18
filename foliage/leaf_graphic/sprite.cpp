@@ -52,7 +52,11 @@ void Foliage::Sprite::draw() const
 	{
 		(*_currentFrame)->drawAt(getPosition());
 	}
-	//Screen::drawRect(getScreenHitbox(), Foliage::Colors::Yellow);
+}
+
+void Foliage::Sprite::drawHitbox(const Foliage::Color color) const
+{
+	Screen::fillRect(getScreenHitbox(), color);
 }
 
 void Foliage::Sprite::setPosition(const Foliage::Point p)
