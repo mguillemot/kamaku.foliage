@@ -5,11 +5,21 @@
 #include <vector>
 #include "foliage.hpp"
 
+enum BulletType
+{ 
+	Bullet_Standard = 0,
+	Bullet_Red = 1,
+	Bullet_Blue = 2,
+	Bullet_Green = 3,
+	Bullet_Green_0 = 4,
+	Bullet_Green_1 = 5
+};
+
 class Bullet
 {
 public:
 	// Constructor & destructor
-    Bullet(const Foliage::Point position, const Foliage::Fixed direction, const Foliage::Fixed speed, const Sint32 type);
+    Bullet(const Foliage::Point position, const Foliage::Fixed direction, const Foliage::Fixed speed, const BulletType type);
     ~Bullet();
 
 	// Instance methods

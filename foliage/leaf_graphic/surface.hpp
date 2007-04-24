@@ -17,12 +17,13 @@ namespace Foliage
 		// Instance members
 		Color  getPixel(const Point p) const;
 		void   setPixel(const Point p, const Color color);
+		void   fill(const Color color);
 		void   drawAt(const Point p) const;
 		Size   getSize() const { return _size; }
 		const  std::string &getName() const { return _name; }
-		Color *getPixels() const { return _pixels; }
 		
 		#ifdef __PPC__
+			Color *getPixels() const { return _pixels; }
 			void   setInstancized(const Sint32 instancized) { _instancized = instancized; }
 			Sint32 getInstancized() const { return _instancized; }
 			Surface *createNewShiftedSurface(const Sint32 shift) const;
@@ -32,14 +33,15 @@ namespace Foliage
 
 		// Static members
 		static Surface *readBMP(const std::string &filename);
+		static Surface *createSurface(const Size s, const std::string &name);
 
 	private:
 		Surface(const Size s, Color *pixels, const std::string &name);
 
 		Size _size;
 		std::string _name;
-		Color *_pixels;
 		#ifdef __PPC__
+			Color *_pixels;
 			Sint32 _instancized;
 		#else
 			SDL_Surface *_SDLSurface;

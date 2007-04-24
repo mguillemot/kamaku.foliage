@@ -6,6 +6,7 @@
 #include "font.hpp"
 #include "gamecolor.hpp"
 #include "enemy.hpp"
+#include "rythm_display.hpp"
 
 #ifdef main
 #undef main
@@ -85,7 +86,11 @@ void start()
 	const Fixed ShipSpeed = Fixed(1.5f);
 	Sint32 hitCount = 0;
 	Sint32 randlevel = 10;
-	bool fireShot0 = false, fireShot1 = false;
+	bool fireShot0 = false, fireShot1 = false, fireLaser0 = false, fireLaser1 = false;
+	Sint32 framesBeforeLaser0 = -1, framesBeforeLaser1 = -1;
+	const Fixed ShotSpeed = Fixed(Sint16(10));
+	const Fixed LaserSpeed = Fixed(Sint16(20));
+	RythmDisplay rythm;
 
 	//SoundManager::playBg(&bg);		
 	
@@ -115,11 +120,33 @@ void start()
 				}
 				else if (e.getButton() == BUTTON1)
 				{
-					fireShot0 = e.getPushed();
+					if (e.getPushed())
+					{
+						fireShot0 = true;
+						fireLaser0 = false;
+						framesBeforeLaser0 = 20;
+					}
+					else
+					{
+						fireShot0 = false;
+						fireLaser0 = false;
+						framesBeforeLaser0 = -1;
+					}
 				}
 				else if (e.getButton() == BUTTON2)
 				{
-					fireShot1 = e.getPushed();
+					if (e.getPushed())
+					{
+						fireShot1 = true;
+						fireLaser1 = false;
+						framesBeforeLaser1 = 20;
+					}
+					else
+					{
+						fireShot1 = false;
+						fireLaser1 = false;
+						framesBeforeLaser1 = -1;
+					}
 				}
 			}
 			else // player 2
@@ -140,6 +167,24 @@ void start()
 					}
 				}
 			}
+		}
+		if (framesBeforeLaser0 >= 0)
+		{
+			if (framesBeforeLaser0 == 0)
+			{
+				fireLaser0 = true;
+				fireLaser1 = false;
+			}
+			framesBeforeLaser0--;
+		}
+		if (framesBeforeLaser1 >= 0)
+		{
+			if (framesBeforeLaser1 == 0)
+			{
+				fireLaser0 = false;
+				fireLaser1 = true;
+			}
+			framesBeforeLaser1--;
 		}
 		ship.setSpeed(s);
 		Rect section;
@@ -189,22 +234,48 @@ void start()
 		}
 		if (fireShot0)
 		{
-			Bullet *b1 = new Bullet(ship.getCenter(), F_3_PI_2, Fixed(Sint16(20)), 4);
-			Bullet *b2 = new Bullet(ship.getCenter(), F_3_PI_2 + F_0_DOT_1, Fixed(Sint16(20)), 4);
-			Bullet *b3 = new Bullet(ship.getCenter(), F_3_PI_2 - F_0_DOT_1, Fixed(Sint16(20)), 4);
-			myBullets.push_back(b1);
+			if (!fireLaser0 && !fireLaser1)
+			{
+				Bullet *b1 = new Bullet(ship.getCenter(), F_3_PI_2, ShotSpeed, Bullet_Red);
+				myBullets.push_back(b1);
+			}
+			Bullet *b2 = new Bullet(ship.getCenter(), F_3_PI_2 + F_0_DOT_1, ShotSpeed, Bullet_Red);
+			Bullet *b3 = new Bullet(ship.getCenter(), F_3_PI_2 - F_0_DOT_1, ShotSpeed, Bullet_Red);
 			myBullets.push_back(b2);
 			myBullets.push_back(b3);
+			fireShot0 = false;
 		}	
 		else if (fireShot1)
 		{
-			Bullet *b1 = new Bullet(ship.getCenter(), F_3_PI_2, Fixed(Sint16(20)), 5);
-			Bullet *b2 = new Bullet(ship.getCenter(), F_3_PI_2 + F_0_DOT_1, Fixed(Sint16(20)), 5);
-			Bullet *b3 = new Bullet(ship.getCenter(), F_3_PI_2 - F_0_DOT_1, Fixed(Sint16(20)), 5);
-			myBullets.push_back(b1);
+			if (!fireLaser0 && !fireLaser1)
+			{
+				Bullet *b1 = new Bullet(ship.getCenter(), F_3_PI_2, ShotSpeed, Bullet_Green);
+				myBullets.push_back(b1);
+			}
+			Bullet *b2 = new Bullet(ship.getCenter(), F_3_PI_2 + F_0_DOT_1, ShotSpeed, Bullet_Green);
+			Bullet *b3 = new Bullet(ship.getCenter(), F_3_PI_2 - F_0_DOT_1, ShotSpeed, Bullet_Green);
 			myBullets.push_back(b2);
 			myBullets.push_back(b3);
+			fireShot1 = false;
 		}	
+		if (fireLaser0)
+		{
+			Rect laser;
+			laser.x = ship.getCenter().x - 5;
+			laser.y = 0;
+			laser.w = 11;
+			laser.h = ship.getCenter().y - 15;
+			Screen::fillRect(laser, Colors::Red);
+		}
+		else if (fireLaser1)
+		{
+			Rect laser;
+			laser.x = ship.getCenter().x - 5;
+			laser.y = 0;
+			laser.w = 11;
+			laser.h = ship.getCenter().y - 15;
+			Screen::fillRect(laser, Colors::Green);
+		}
 		if ((frame % 25) == 0) // pop new enemies
 		{
 			GameColor c;
@@ -261,6 +332,7 @@ void start()
 		
 		// BEGIN DRAWING SPRITES NOW!
 		
+		rythm.getUpdatedSurface()->drawAt(Point(20, 200));
 		ship.draw();
 		if (show_hitbox)
 		{
@@ -319,7 +391,7 @@ void start()
 					{
 						j = myBullets.erase(j);
 						delete b;
-						(*enn)->damage(25);
+						(*enn)->damage(1);
 						deleted = true;
 						break;
 					}

@@ -22,8 +22,8 @@ Foliage::Surface::Surface(const Foliage::Size s, Foliage::Color *pixels, const s
 	: _size(s)
 {
 	_name = name;
-	_pixels = pixels;
 	#ifdef __PPC__
+		_pixels = pixels;
 		_instancized = -1;
 	#else
 		_SDLSurface = SDL_CreateRGBSurfaceFrom(pixels, s.w, s.h, 16, s.w * 2, 0x1f << 11, 0x3f << 5, 0x1f, 0);
@@ -31,29 +31,74 @@ Foliage::Surface::Surface(const Foliage::Size s, Foliage::Color *pixels, const s
 	#endif
 }
 
+Foliage::Surface *Foliage::Surface::createSurface(const Foliage::Size s, const std::string &name)
+{
+	Foliage::Color *pixels = new Color[s.w * s.h];
+	return new Foliage::Surface(s, pixels, name);
+}
+
 Foliage::Surface::~Surface()
 {
-	#ifndef __PPC__
+	#ifdef __PPC__
+		delete _pixels;
+	#else
 		SDL_FreeSurface(_SDLSurface);
 	#endif
-	delete _pixels;
 }
 
 Foliage::Color Foliage::Surface::getPixel(const Foliage::Point p) const
 {
-	#ifdef REARRANGE_SURFACES
-		return _pixels[p.x * _size.h + _size.h - 1 - p.y];
+	#ifdef __PPC__
+		#ifdef REARRANGE_SURFACES
+			return _pixels[p.x * _size.h + _size.h - 1 - p.y];
+		#else
+			return _pixels[p.y * _size.w + p.x];
+		#endif
 	#else
-		return _pixels[p.y * _size.w + p.x];
+		SDL_LockSurface(_SDLSurface);
+		if (_SDLSurface->format->BytesPerPixel != 2)
+		{
+			std::cout << "FOLIAGE can only work on 16 bpp surfaces." << std::endl;
+			exit(1);
+		}
+		Uint8 *addr = (Uint8 *)_SDLSurface->pixels + p.y * _SDLSurface->pitch + p.x * 2;
+		Foliage::Color *pix = (Foliage::Color *)addr;
+		SDL_UnlockSurface(_SDLSurface);
+		return *pix;
 	#endif
 }
 
 void Foliage::Surface::setPixel(const Foliage::Point p, const Foliage::Color color)
 {
-	#ifdef REARRANGE_SURFACES
-		_pixels[p.x * _size.h + _size.h - 1 - p.y] = color;
+	#ifdef __PPC__
+		#ifdef REARRANGE_SURFACES
+			_pixels[p.x * _size.h + _size.h - 1 - p.y] = color;
+		#else
+			_pixels[p.y * _size.w + p.x] = color;
+		#endif
 	#else
-		_pixels[p.y * _size.w + p.x] = color;
+		SDL_LockSurface(_SDLSurface);
+		if (_SDLSurface->format->BytesPerPixel != 2)
+		{
+			std::cout << "FOLIAGE can only work on 16 bpp surfaces." << std::endl;
+			exit(1);
+		}
+		Uint8 *addr = (Uint8 *)_SDLSurface->pixels + p.y * _SDLSurface->pitch + p.x * 2;
+		Foliage::Color *pix = (Foliage::Color *)addr;
+		*pix = color;
+		SDL_UnlockSurface(_SDLSurface);
+	#endif
+}
+
+void Foliage::Surface::fill(const Foliage::Color color)
+{
+	#ifdef __PPC__
+		for (int i = 0; i < (_size.w * _size.h); i++)
+		{
+			_pixels[i] = color;
+		}
+	#else
+		SDL_FillRect(_SDLSurface, NULL, color);
 	#endif
 }
 

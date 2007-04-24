@@ -204,6 +204,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\game\rythm_display.hpp"
+				>
+			</File>
+			<File
 				RelativePath="..\game\start.cpp"
 				>
 			</File>

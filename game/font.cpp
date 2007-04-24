@@ -3,6 +3,7 @@
 Font::Font()
 {
 	_characters['a'] = Foliage::BitmapLoader::loadBitmap("a.bmp");
+	_characterSize = _characters['a']->getSize();
 	Foliage::Instancizator::instancize(_characters['a']);
 	_characters['b'] = Foliage::BitmapLoader::loadBitmap("b.bmp");
 	Foliage::Instancizator::instancize(_characters['b']);
@@ -156,7 +157,7 @@ void Font::drawString(const std::string s, const Foliage::Point p) const
 			cursor.x += 17;
 			if ((cursor.x + 16) >= Foliage::Screen::Width)
 			{
-				// rest of the string is off-screen
+				// remaining of the string is off-screen
 				return;
 			}
 		}

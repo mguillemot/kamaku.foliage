@@ -22,7 +22,7 @@ void Bullet::loadBulletSurfaces()
 	Foliage::Instancizator::instancize(_bulletSurfaces[5]);
 }
 
-Bullet::Bullet(const Foliage::Point position, const Foliage::Fixed direction, const Foliage::Fixed speed, const Sint32 type)
+Bullet::Bullet(const Foliage::Point position, const Foliage::Fixed direction, const Foliage::Fixed speed, const BulletType type)
 	: _direction(direction)
 {
     _sprite = new Foliage::Sprite(_bulletSurfaces[type]);

@@ -101,7 +101,6 @@ Sint32 Foliage::Screen::waitUntilEndOfFrame()
 
 		return frameSkipped;
 	#else
-		return 0;
 		const Uint32 oneFrame = 1000000 / SCREEN_FPS;
 		const Uint32 currentDuration = _timer.duration();
 		Sint32 frameSkipped = 0;

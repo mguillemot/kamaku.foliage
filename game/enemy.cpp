@@ -53,7 +53,7 @@ Enemy::~Enemy()
     delete _sprite;
 }
 
-Bullet *Enemy::fireAt(const Foliage::Point p, const Foliage::Fixed speed, const Foliage::Fixed shift_angle, const Sint32 bulletType) const
+Bullet *Enemy::fireAt(const Foliage::Point p, const Foliage::Fixed speed, const Foliage::Fixed shift_angle, const BulletType bulletType) const
 {
 	const Foliage::Point pos = _sprite->getPosition();
 	const Foliage::Point from(pos.x + _turret.x, pos.y + _turret.y);
@@ -117,9 +117,9 @@ void Enemy::update()
         {
             //_fireCount = 0;
             //float speed = 10.0f + (float)_difficulty / 5;
-			fireAt(playerShip->getCenter(), Foliage::Fixed(Sint16(10)), F_0, 0);
-			fireAt(playerShip->getCenter(), Foliage::Fixed(Sint16(10)), Foliage::Fixed(0.2f), 1);
-			fireAt(playerShip->getCenter(), Foliage::Fixed(Sint16(10)), Foliage::Fixed(-0.2f), 1);
+			//fireAt(playerShip->getCenter(), Foliage::Fixed(Sint16(10)), F_0, Bullet_Standard);
+			//fireAt(playerShip->getCenter(), Foliage::Fixed(Sint16(10)), Foliage::Fixed(0.2f), Bullet_Standard);
+			//fireAt(playerShip->getCenter(), Foliage::Fixed(Sint16(10)), Foliage::Fixed(-0.2f), Bullet_Standard);
         }
     }
 }
