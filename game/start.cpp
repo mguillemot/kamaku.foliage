@@ -96,6 +96,8 @@ void start()
 	
 	while (true)
 	{
+		rythm.nextFrame();
+
 		while (Foliage::InputManager::numberOfEvents() > 0)
 		{
 			InputEvent e = Foliage::InputManager::nextEvent();

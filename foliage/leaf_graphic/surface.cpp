@@ -14,8 +14,28 @@
 	#define fread sysace_fread
 	#define fclose sysace_fclose
 #else
-	#include <cstdio>
-	#include <SDL.h>
+
+#include <cstdio>
+#include <SDL.h>
+
+void Foliage::Surface::lock() const
+{
+	if (_locks == 0)
+	{
+		SDL_LockSurface(_SDLSurface);
+	}
+	_locks++;
+}
+
+void Foliage::Surface::unlock() const
+{
+	_locks--;
+	if (_locks == 0)
+	{
+		SDL_UnlockSurface(_SDLSurface);
+	}
+}
+
 #endif
 
 Foliage::Surface::Surface(const Foliage::Size s, Foliage::Color *pixels, const std::string &name) 
@@ -27,6 +47,7 @@ Foliage::Surface::Surface(const Foliage::Size s, Foliage::Color *pixels, const s
 		_instancized = -1;
 	#else
 		_SDLSurface = SDL_CreateRGBSurfaceFrom(pixels, s.w, s.h, 16, s.w * 2, 0x1f << 11, 0x3f << 5, 0x1f, 0);
+		_locks = 0;
         SDL_SetColorKey(_SDLSurface, SDL_RLEACCEL | SDL_SRCCOLORKEY, SDL_MapRGB(_SDLSurface->format, 0xFF, 0, 0xFF));	
 	#endif
 }
@@ -55,7 +76,7 @@ Foliage::Color Foliage::Surface::getPixel(const Foliage::Point p) const
 			return _pixels[p.y * _size.w + p.x];
 		#endif
 	#else
-		SDL_LockSurface(_SDLSurface);
+		lock();
 		if (_SDLSurface->format->BytesPerPixel != 2)
 		{
 			std::cout << "FOLIAGE can only work on 16 bpp surfaces." << std::endl;
@@ -63,10 +84,12 @@ Foliage::Color Foliage::Surface::getPixel(const Foliage::Point p) const
 		}
 		Uint8 *addr = (Uint8 *)_SDLSurface->pixels + p.y * _SDLSurface->pitch + p.x * 2;
 		Foliage::Color *pix = (Foliage::Color *)addr;
-		SDL_UnlockSurface(_SDLSurface);
+		unlock();
 		return *pix;
 	#endif
 }
+
+Foliage::Rect getBoundingRect() const;
 
 void Foliage::Surface::setPixel(const Foliage::Point p, const Foliage::Color color)
 {
@@ -77,16 +100,68 @@ void Foliage::Surface::setPixel(const Foliage::Point p, const Foliage::Color col
 			_pixels[p.y * _size.w + p.x] = color;
 		#endif
 	#else
-		SDL_LockSurface(_SDLSurface);
-		if (_SDLSurface->format->BytesPerPixel != 2)
-		{
-			std::cout << "FOLIAGE can only work on 16 bpp surfaces." << std::endl;
-			exit(1);
-		}
+		lock();
 		Uint8 *addr = (Uint8 *)_SDLSurface->pixels + p.y * _SDLSurface->pitch + p.x * 2;
 		Foliage::Color *pix = (Foliage::Color *)addr;
 		*pix = color;
-		SDL_UnlockSurface(_SDLSurface);
+		unlock();
+	#endif
+}
+
+void Foliage::Surface::drawLine(const Foliage::Point from, const Foliage::Point to, const Foliage::Color color)
+{
+	#ifndef __PPC__
+		lock();
+	#endif
+	if (from.x == to.x)
+	{
+		// vertical line
+		for (Sint16 y = from.y; y <= to.y; y++)
+		{
+			setPixel(Foliage::Point(from.x, y), color);
+		}
+	}
+	else if (from.y == to.y)
+	{
+		// horizontal line
+		for (Sint16 x = from.x; x <= to.x; x++)
+		{
+			setPixel(Foliage::Point(x, from.y), color);
+		}
+	}
+	else
+	{
+		// y = a*b + b
+		const Foliage::Fixed a = Foliage::Fixed(Sint16(to.y - from.y)) / Foliage::Fixed(Sint16(to.x - from.x));
+		const Foliage::Fixed b = Foliage::Fixed(from.y) - a * from.x;
+		Foliage::Fixed y = a * from.x + b;
+		setPixel(Foliage::Point(from.x, y), color);
+		for (Sint16 x = from.x + 1; x <= to.x; x++)
+		{
+			y += a;
+			setPixel(Foliage::Point(x, y), color);
+		}
+	}
+	#ifndef __PPC__
+		unlock();
+	#endif
+}
+
+void Foliage::Surface::drawRect(const Foliage::Rect &r, const Foliage::Color color)
+{
+	#ifndef __PPC__
+		lock();
+	#endif
+	const Foliage::Point c1 = Foliage::Point(r.x, r.y);
+	const Foliage::Point c2 = Foliage::Point(r.x, r.y + r.h - 1);
+	const Foliage::Point c3 = Foliage::Point(r.x + r.w - 1, r.y);
+	const Foliage::Point c4 = Foliage::Point(r.x + r.w - 1, r.y + r.h - 1);
+	drawLine(c1, c2, color);
+	drawLine(c1, c3, color);
+	drawLine(c2, c4, color);
+	drawLine(c3, c4, color);
+	#ifndef __PPC__
+		unlock();
 	#endif
 }
 
