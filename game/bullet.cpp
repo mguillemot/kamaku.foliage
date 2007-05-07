@@ -1,6 +1,7 @@
 #include <iostream>
 #include "bullet.hpp"
 #include "fastmath.hpp"
+#include "game_globals.hpp"
 
 #define NB_BULLET_TYPES 6
 
@@ -25,6 +26,7 @@ void Bullet::loadBulletSurfaces()
 Bullet::Bullet(const Foliage::Point position, const Foliage::Fixed direction, const Foliage::Fixed speed, const BulletType type)
 	: _direction(direction)
 {
+	_dead = false;
     _sprite = new Foliage::Sprite(_bulletSurfaces[type]);
     const Foliage::Size size = _sprite->getSize();
 	if (type >= 0 && type <= 3)
@@ -70,4 +72,26 @@ void Bullet::setDirection(const Foliage::Fixed direction)
 {
     _direction = direction;
     updateSpriteSpeed();
+}
+
+void BulletGenerator::update()
+{
+	Bullet::update();
+	_generateTimer--;
+	if (_generateTimer == 0)
+	{
+		_dead = true;
+		const Foliage::Point from = _sprite->getCenter();
+		const int N = 20;
+		Foliage::Fixed space = F_TWOPI;
+		space /= Sint16(N);
+		Foliage::Fixed angle;
+		const Foliage::Fixed speed(Sint16(4));
+		for (int i = 0; i < N; i++)
+		{
+			Bullet *shot = new Bullet(from, angle, speed, Bullet_Standard);
+			currentLevel.enemyBullets.push_back(shot);
+			angle += space;
+		}
+	}
 }

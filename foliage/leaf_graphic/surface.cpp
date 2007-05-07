@@ -89,7 +89,10 @@ Foliage::Color Foliage::Surface::getPixel(const Foliage::Point p) const
 	#endif
 }
 
-Foliage::Rect getBoundingRect() const;
+Foliage::Rect Foliage::Surface::getBoundingRect() const
+{
+	return Foliage::Rect(Foliage::Point(0, 0), _size);
+}
 
 void Foliage::Surface::setPixel(const Foliage::Point p, const Foliage::Color color)
 {
@@ -131,15 +134,37 @@ void Foliage::Surface::drawLine(const Foliage::Point from, const Foliage::Point 
 	}
 	else
 	{
-		// y = a*b + b
-		const Foliage::Fixed a = Foliage::Fixed(Sint16(to.y - from.y)) / Foliage::Fixed(Sint16(to.x - from.x));
-		const Foliage::Fixed b = Foliage::Fixed(from.y) - a * from.x;
-		Foliage::Fixed y = a * from.x + b;
-		setPixel(Foliage::Point(from.x, y), color);
-		for (Sint16 x = from.x + 1; x <= to.x; x++)
+		const Sint16 dx = to.x - from.x;
+		const Sint16 dy = to.y - from.y;
+		if ((dy + dx) < 0)
 		{
-			y += a;
-			setPixel(Foliage::Point(x, y), color);
+			drawLine(to, from, color);
+		}
+		if (dx >= dy)
+		{
+			// y = a*b + b
+			const Foliage::Fixed a = Foliage::Fixed(dy) / Foliage::Fixed(dx);
+			const Foliage::Fixed b = Foliage::Fixed(from.y) - a * from.x;
+			Foliage::Fixed y = a * from.x + b;
+			setPixel(Foliage::Point(from.x, y), color);
+			for (Sint16 x = from.x + 1; x <= to.x; x++)
+			{
+				y += a;
+				setPixel(Foliage::Point(x, y), color);
+			}
+		}
+		else
+		{
+			// x = a'*y + b'
+			const Foliage::Fixed a_prime = Foliage::Fixed(dx) / Foliage::Fixed(dy);
+			const Foliage::Fixed b_prime = Foliage::Fixed(from.x) - a_prime * from.y;
+			Foliage::Fixed x = a_prime * from.y + b_prime;
+			setPixel(Foliage::Point(x, from.y), color);
+			for (Sint16 y = from.y + 1; y <= to.y; y++)
+			{
+				x += a_prime;
+				setPixel(Foliage::Point(x, y), color);
+			}
 		}
 	}
 	#ifndef __PPC__

@@ -5,7 +5,7 @@
 #include <string>
 #include "foliage.hpp"
 
-typedef std::map<const char, Foliage::Surface*> charactersMap;
+typedef std::map<const char, Foliage::Surface*> CharactersMap;
 
 class Font
 {
@@ -16,7 +16,7 @@ public:
 	Foliage::Size getCharacterSize() const { return _characterSize; }
 	
 private:
-	charactersMap _characters;
+	CharactersMap _characters;
 	Foliage::Size _characterSize;
 };
 

@@ -200,6 +200,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\game\game_globals.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\game\game_globals.hpp"
+				>
+			</File>
+			<File
 				RelativePath="..\game\gamecolor.hpp"
 				>
 			</File>

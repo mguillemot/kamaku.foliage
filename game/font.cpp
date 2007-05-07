@@ -81,42 +81,40 @@ Font::Font()
 	_characters['X'] = Foliage::BitmapLoader::loadBitmap("x.bmp");
 	_characters['Y'] = Foliage::BitmapLoader::loadBitmap("y.bmp");
 	_characters['Z'] = Foliage::BitmapLoader::loadBitmap("z.bmp");
-	_characters['.'] = Foliage::BitmapLoader::loadBitmap("point.bmp");
-	Foliage::Instancizator::instancize(_characters['.']);
-	_characters[','] = Foliage::BitmapLoader::loadBitmap("virgule.bmp");
-	Foliage::Instancizator::instancize(_characters[',']);
-	_characters[':'] = Foliage::BitmapLoader::loadBitmap("deuxpoin.bmp");
+	//_characters['.'] = Foliage::BitmapLoader::loadBitmap("s_dot.bmp");
+	//Foliage::Instancizator::instancize(_characters['.']);
+	_characters[':'] = Foliage::BitmapLoader::loadBitmap("s_col.bmp");
 	Foliage::Instancizator::instancize(_characters[':']);
-	_characters[';'] = Foliage::BitmapLoader::loadBitmap("poinvirg.bmp");
+	/*_characters[';'] = Foliage::BitmapLoader::loadBitmap("s_sco.bmp");
 	Foliage::Instancizator::instancize(_characters[';']);
-	_characters['!'] = Foliage::BitmapLoader::loadBitmap("exclam.bmp");
+	_characters['!'] = Foliage::BitmapLoader::loadBitmap("s_exc.bmp");
 	Foliage::Instancizator::instancize(_characters['!']);
-	_characters['?'] = Foliage::BitmapLoader::loadBitmap("interr.bmp");
+	_characters['?'] = Foliage::BitmapLoader::loadBitmap("s_int.bmp");
 	Foliage::Instancizator::instancize(_characters['?']);
-	_characters['+'] = Foliage::BitmapLoader::loadBitmap("plus.bmp");
+	_characters['+'] = Foliage::BitmapLoader::loadBitmap("s_plu.bmp");
 	Foliage::Instancizator::instancize(_characters['+']);
-	_characters['-'] = Foliage::BitmapLoader::loadBitmap("moins.bmp");
+	_characters['-'] = Foliage::BitmapLoader::loadBitmap("s_min.bmp");
 	Foliage::Instancizator::instancize(_characters['-']);
-	_characters['('] = Foliage::BitmapLoader::loadBitmap("parenth.bmp");
+	_characters['('] = Foliage::BitmapLoader::loadBitmap("s_pao.bmp");
 	Foliage::Instancizator::instancize(_characters['(']);
-	_characters[')'] = Foliage::BitmapLoader::loadBitmap("parenthf.bmp");
+	_characters[')'] = Foliage::BitmapLoader::loadBitmap("s_pac.bmp");
 	Foliage::Instancizator::instancize(_characters[')']);
-	_characters['['] = Foliage::BitmapLoader::loadBitmap("crochet.bmp");
+	_characters['['] = Foliage::BitmapLoader::loadBitmap("s_cro.bmp");
 	Foliage::Instancizator::instancize(_characters['[']);
-	_characters[']'] = Foliage::BitmapLoader::loadBitmap("crochetf.bmp");
+	_characters[']'] = Foliage::BitmapLoader::loadBitmap("s_crc.bmp");
 	Foliage::Instancizator::instancize(_characters[']']);
-	_characters['{'] = Foliage::BitmapLoader::loadBitmap("accolad.bmp");
+	_characters['{'] = Foliage::BitmapLoader::loadBitmap("s_bro.bmp");
 	Foliage::Instancizator::instancize(_characters['{']);
-	_characters['}'] = Foliage::BitmapLoader::loadBitmap("accoladf.bmp");
+	_characters['}'] = Foliage::BitmapLoader::loadBitmap("s_brc.bmp");
 	Foliage::Instancizator::instancize(_characters['}']);
-	_characters['='] = Foliage::BitmapLoader::loadBitmap("egal.bmp");
+	_characters['='] = Foliage::BitmapLoader::loadBitmap("s_equ.bmp");
 	Foliage::Instancizator::instancize(_characters['=']);
-	_characters['*'] = Foliage::BitmapLoader::loadBitmap("etoile.bmp");
+	_characters['*'] = Foliage::BitmapLoader::loadBitmap("s_sta.bmp");
 	Foliage::Instancizator::instancize(_characters['*']);
-	_characters['#'] = Foliage::BitmapLoader::loadBitmap("diese.bmp");
+	_characters['#'] = Foliage::BitmapLoader::loadBitmap("s_die.bmp");
 	Foliage::Instancizator::instancize(_characters['#']);
-	_characters[' '] = Foliage::BitmapLoader::loadBitmap("espace.bmp");
-	Foliage::Instancizator::instancize(_characters[' ']);
+	_characters[' '] = Foliage::BitmapLoader::loadBitmap("s_spa.bmp");
+	Foliage::Instancizator::instancize(_characters[' ']);*/
 	_characters['0'] = Foliage::BitmapLoader::loadBitmap("0.bmp");
 	Foliage::Instancizator::instancize(_characters['0']);
 	_characters['1'] = Foliage::BitmapLoader::loadBitmap("1.bmp");
@@ -150,12 +148,12 @@ void Font::drawString(const std::string s, const Foliage::Point p) const
 	for (std::string::const_iterator i = s.begin(); i != s.end(); ++i)
 	{
 		const char c = *i;
-		charactersMap::const_iterator surf = _characters.find(c);
+		CharactersMap::const_iterator surf = _characters.find(c);
 		if (surf != _characters.end())
 		{
 			(*surf).second->drawAt(cursor);
-			cursor.x += 17;
-			if ((cursor.x + 16) >= Foliage::Screen::Width)
+			cursor.x += _characterSize.w + 1;
+			if ((cursor.x + _characterSize.w) >= Foliage::Screen::Width)
 			{
 				// remaining of the string is off-screen
 				return;

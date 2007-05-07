@@ -5,7 +5,7 @@
 #include "bitmap_loader.hpp"
 
 Foliage::Sprite::Sprite(const std::string &filename) 
-	: _x(), _y()
+	: _x(), _y(), _delayBetweenFrames(1), _delayCount(1)
 {
 	_hitbox.w = 0;
 	_hitbox.h = 0;
@@ -14,7 +14,7 @@ Foliage::Sprite::Sprite(const std::string &filename)
 }
 
 Foliage::Sprite::Sprite(Foliage::Surface *surface)
-	: _x(), _y()
+	: _x(), _y(), _delayBetweenFrames(1), _delayCount(1)
 {
 	_hitbox.w = 0;
 	_hitbox.h = 0;
@@ -25,6 +25,18 @@ Foliage::Sprite::Sprite(Foliage::Surface *surface)
 void Foliage::Sprite::addFrame(const std::string &filename)
 {
 	_frames.push_back(Foliage::BitmapLoader::loadBitmap(filename));
+}
+
+void Foliage::Sprite::addFrame(Foliage::Surface *surface)
+{
+	_frames.push_back(surface);
+}
+
+void Foliage::Sprite::changeFrame(Foliage::Surface *surface)
+{
+	_frames.clear();
+	_frames.push_back(surface);
+	_currentFrame = _frames.begin();
 }
 
 Foliage::Sprite::~Sprite()
@@ -93,11 +105,22 @@ void Foliage::Sprite::move()
 {
 	_x += _s.x;
 	_y += _s.y;
-	++_currentFrame;
-	if (_currentFrame == _frames.end())
+	_delayCount--;
+	if (_delayCount == 0)
 	{
-		_currentFrame = _frames.begin();
+		++_currentFrame;
+		_delayCount = _delayBetweenFrames;
+		if (_currentFrame == _frames.end())
+		{
+			_currentFrame = _frames.begin();
+		}
 	}
+}
+
+void Foliage::Sprite::setDelayBetweenFrames(const Sint32 delay)
+{
+	_delayBetweenFrames = delay;
+	_delayCount = delay;
 }
 
 bool Foliage::Sprite::outOfScreen() const
@@ -111,11 +134,6 @@ bool Foliage::Sprite::outOfScreen() const
 Foliage::Size Foliage::Sprite::getSize() const
 {
 	return (*_currentFrame)->getSize();
-}
-
-bool Foliage::Sprite::isAnimated() const
-{
-	return (_frames.size() > 1);
 }
 
 void Foliage::Sprite::inspect()

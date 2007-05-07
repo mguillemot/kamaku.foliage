@@ -3,6 +3,7 @@
 
 #include "../basic_types.hpp"
 #include "../settings.hpp"
+#include "../fastmath.hpp"
 
 namespace Foliage
 {
@@ -37,6 +38,30 @@ namespace Foliage
 			: x(px), y(py)
 		{
 		}
+
+		static Fixed angleBetween(const Point from, const Point to)
+		{
+			const Sint16 dx = to.x - from.x;
+			const Sint16 dy = to.y - from.y;
+			Fixed angle;
+			if (dx != 0)
+			{
+				angle = FastMath::atan(Foliage::Fixed(dy) / Foliage::Fixed(dx));
+			}
+			else if (dy > 0)
+			{
+				angle = F_PI_2;
+			}
+			else
+			{
+				angle = F_MINUS_PI_2;
+			}
+			if (dx < 0)
+			{
+				angle += F_PI;
+			}
+			return angle;
+		}
 	};
 	
 	struct Speed
@@ -70,6 +95,12 @@ namespace Foliage
 		Rect(const Point p, const Size s)
 			: x(p.x), y(p.y), w(s.w), h(s.h)
 		{
+		}
+
+		void shift(const Point shift)
+		{
+			x += shift.x;
+			y += shift.y;
 		}
 		
 		static bool intersects(const Rect &a, const Rect &b);

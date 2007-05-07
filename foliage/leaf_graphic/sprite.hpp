@@ -20,6 +20,8 @@ namespace Foliage
 		
 		// Instance methods
 		void  addFrame(const std::string &filename);
+		void  addFrame(Surface *surface);
+		void  changeFrame(Surface *surface);
 		void  draw() const;
 		void  drawHitbox(const Color color) const;
 		void  move();
@@ -32,7 +34,7 @@ namespace Foliage
 		Rect  getScreenHitbox() const;
 		void  setHitbox(const Rect &hitbox);
 		Size  getSize() const;
-		bool  isAnimated() const;
+		void  setDelayBetweenFrames(const Sint32 delay);
 		
 		// DEBUG
 		Surface *getCurrentSurface() { return *_currentFrame; }
@@ -44,6 +46,7 @@ namespace Foliage
 		std::list<Surface *> _frames;
 		std::list<Surface *>::const_iterator _currentFrame;
 		Rect _hitbox;
+		Sint32 _delayBetweenFrames, _delayCount;
 	};
 
 }

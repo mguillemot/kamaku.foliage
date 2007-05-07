@@ -29,6 +29,7 @@ namespace Foliage
 		static void clear();
 		static void fillRect(const Rect r, const Color color);
 		static void setPixel(const Point pos, const Color color);
+		static void drawLine(const Point from, const Point to, const Color color);
 		static void flip();
 		static Sint32 waitUntilEndOfFrame();
 		static Synchronizator asyncBlitSection(const Surface *surf, const Rect section, const Point pos);

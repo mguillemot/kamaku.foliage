@@ -2,32 +2,44 @@
 #define __ENEMY
 
 #include <list>
-#include "foliage.hpp"
 #include "bullet.hpp"
+#include "foliage.hpp"
 #include "gamecolor.hpp"
 
 class Enemy
 {
 public:
     Enemy(const GameColor c = None);
-    virtual ~Enemy();
-    virtual void update(); // = 0
+    virtual     ~Enemy();
+
+    virtual void update();
 	Bullet      *fireAt(const Foliage::Point p, const Foliage::Fixed speed, const Foliage::Fixed shift_angle, const BulletType bulletType) const;
-	Foliage::Sprite *getSprite() const { return _sprite; }
+	virtual void display() const;
     void         explode();
-	bool         getKilled() const { return _killed; }
-	int          getKilledTime() const { return _killedTime; }
-	bool         collidesWith(const Bullet *b) const;
-    virtual void damage(const Sint32 damage);
+	bool         isDead() const;
+	bool         hasDisappeared() const;
+	virtual bool collidesWith(const Bullet *b);
+	virtual void drawHitbox(const Foliage::Color color) const;
 	GameColor    getColor() const { return _color; }
+	Foliage::Size getSize() const { return _sprite->getSize(); }
+	virtual void setPosition(const Foliage::Point p);
+	virtual void setSpeed(const Foliage::Speed s);
+
+	static void loadSurfaces();
 
 protected:
-	Foliage::Point   _turret;
+	Foliage::Point   _turretPosition;
 	Foliage::Sprite *_sprite;
-    bool             _killed;
-    Uint32           _killedTime;
+	Foliage::Sprite *_turret;
+    Sint32           _killedDuration;
     Sint32           _life;
 	GameColor        _color;
+	Foliage::Rect    _hitbox[3];//TBH
+
+	void         updateTurret();
+
+	static Foliage::Surface *surface_ship[16]; //TO BE HERITED
+	static Foliage::Surface *surface_turret[16]; //TO BE HERITED
 };
 
 typedef std::list<Enemy *> ListEnemy;
