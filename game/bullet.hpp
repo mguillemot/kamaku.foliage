@@ -56,7 +56,7 @@ public:
 	BulletGenerator(const Foliage::Point position, const Foliage::Fixed direction, const Foliage::Fixed speed, const BulletType type)
 		: Bullet(position, direction, speed, type)
 	{
-		_generateTimer = 60;
+		_generateTimer = 40;
 	}
 
     virtual ~BulletGenerator()

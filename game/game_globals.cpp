@@ -1,4 +1,4 @@
 #include "game_globals.hpp"
 
-Game currentGame;
-Level currentLevel;
+Game *currentGame;
+Level *currentLevel;

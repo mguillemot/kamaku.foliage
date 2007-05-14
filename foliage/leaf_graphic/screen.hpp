@@ -16,14 +16,15 @@ namespace Foliage
 	{
 	public:
 		#ifndef SCREEN_VERTICAL
-		static const Sint32 Width = SCREEN_WIDTH;
-		static const Sint32 Height = SCREEN_HEIGHT;
+		static const Sint16 Width = SCREEN_WIDTH;
+		static const Sint16 Height = SCREEN_HEIGHT;
 		static const ScreenMode Mode = YOKO;
 		#else
-		static const Sint32 Width = SCREEN_HEIGHT;
-		static const Sint32 Height = SCREEN_WIDTH;
+		static const Sint16 Width = SCREEN_HEIGHT;
+		static const Sint16 Height = SCREEN_WIDTH;
 		static const ScreenMode Mode = TATE;
 		#endif
+		static const Sint16 Diagonal = SCREEN_DIAGONAL;
 
 		static void init();
 		static void clear();

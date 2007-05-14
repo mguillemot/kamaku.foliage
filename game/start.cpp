@@ -8,6 +8,7 @@
 #include "enemy.hpp"
 #include "rythm_display.hpp"
 #include "game_globals.hpp"
+#include "laser.hpp"
 
 #ifdef main
 #undef main
@@ -59,8 +60,10 @@ void start()
 	Bullet::loadBulletSurfaces();
 	Enemy::loadSurfaces();
 
-	currentGame.reset();
-	currentLevel.reset();
+	currentGame = new Game();
+	currentGame->reset();
+	currentLevel = new Level();
+	currentLevel->reset();
 
 	Sint32 skipped = 0;
     Font font;
@@ -72,7 +75,7 @@ void start()
 		Foliage::Sprite background3(background.getCurrentSurface()->createNewShiftedSurface(3));
 	#endif
 	Foliage::Sprite ship("vaiss00.bmp");
-	currentLevel.playerShip = &ship;
+	currentLevel->playerShip = &ship;
 	ship.addFrame("vaiss01.bmp");
 	ship.addFrame("vaiss02.bmp");
 	ship.addFrame("vaiss03.bmp");
@@ -93,7 +96,7 @@ void start()
 
 	Enemy *e = new Enemy();
 	e->setPosition(Point(100, 100));
-	currentLevel.enemies.push_back(e);
+	currentLevel->enemies.push_back(e);
 
 	//SoundManager::playBg(&bg);		
 	
@@ -158,7 +161,7 @@ void start()
 			{
 				if (e.getButton() == BUTTON3 && e.getPushed())
 				{
-					currentGame.show_hitbox = !currentGame.show_hitbox;
+					currentGame->show_hitbox = !currentGame->show_hitbox;
 				}
 				else if (e.getButton() == BUTTON1 && e.getPushed())
 				{
@@ -196,7 +199,7 @@ void start()
 		section.w = 240;
 		section.h = 320;
 		section.x = ship.getPosition().x / 4;
-		section.y = background.getSize().h - 320 - currentGame.frame;
+		section.y = background.getSize().h - 320 - currentGame->frame;
 		if (section.y < 0)
 			section.y = 0;
 		Synchronizator waitEndOfBg;
@@ -221,15 +224,15 @@ void start()
 			waitEndOfBg = Screen::asyncBlitSection(background.getCurrentSurface(), section, Point(0, 0));
 		#endif
 		ship.move();
-		ListEnemy::iterator enn = currentLevel.enemies.begin();
-		while (enn != currentLevel.enemies.end())
+		ListEnemy::iterator enn = currentLevel->enemies.begin();
+		while (enn != currentLevel->enemies.end())
 		{
 			Enemy *e = *enn;
 			e->update();
 			if (e->hasDisappeared())
 			{
 				delete e;
-				enn = currentLevel.enemies.erase(enn);
+				enn = currentLevel->enemies.erase(enn);
 			}
 			else
 			{
@@ -241,12 +244,12 @@ void start()
 			if (!fireLaser0 && !fireLaser1)
 			{
 				Bullet *b1 = new Bullet(ship.getCenter(), F_3_PI_2, ShotSpeed, Bullet_Red);
-				currentLevel.myBullets.push_back(b1);
+				currentLevel->myBullets.push_back(b1);
 			}
 			Bullet *b2 = new Bullet(ship.getCenter(), F_3_PI_2 + F_0_DOT_1, ShotSpeed, Bullet_Red);
 			Bullet *b3 = new Bullet(ship.getCenter(), F_3_PI_2 - F_0_DOT_1, ShotSpeed, Bullet_Red);
-			currentLevel.myBullets.push_back(b2);
-			currentLevel.myBullets.push_back(b3);
+			currentLevel->myBullets.push_back(b2);
+			currentLevel->myBullets.push_back(b3);
 			fireShot0 = false;
 		}	
 		else if (fireShot1)
@@ -254,12 +257,12 @@ void start()
 			if (!fireLaser0 && !fireLaser1)
 			{
 				Bullet *b1 = new Bullet(ship.getCenter(), F_3_PI_2, ShotSpeed, Bullet_Green);
-				currentLevel.myBullets.push_back(b1);
+				currentLevel->myBullets.push_back(b1);
 			}
 			Bullet *b2 = new Bullet(ship.getCenter(), F_3_PI_2 + F_0_DOT_1, ShotSpeed, Bullet_Green);
 			Bullet *b3 = new Bullet(ship.getCenter(), F_3_PI_2 - F_0_DOT_1, ShotSpeed, Bullet_Green);
-			currentLevel.myBullets.push_back(b2);
-			currentLevel.myBullets.push_back(b3);
+			currentLevel->myBullets.push_back(b2);
+			currentLevel->myBullets.push_back(b3);
 			fireShot1 = false;
 		}	
 		if (fireLaser0)
@@ -280,7 +283,7 @@ void start()
 			laser.h = ship.getCenter().y - 15;
 			Screen::fillRect(laser, Colors::Green);
 		}
-		if ((currentGame.frame % 25) == 250) // pop new enemies//TEMP:desactivated
+		if ((currentGame->frame % 25) == 250) // pop new enemies//TEMP:desactivated
 		{
 			GameColor c;
 			Sint32 r = rand() % 100;
@@ -321,12 +324,12 @@ void start()
 			Sint16 sy = (rand() % 4) + 1;
 			e->setPosition(Point((rand() % 150) + 1 - e->getSize().h, 0));
 			e->setSpeed(Speed(Fixed(sx), Fixed(sy)));
-			currentLevel.enemies.push_back(e);
+			currentLevel->enemies.push_back(e);
 		}
 		string frame_nb = "frame #";
-		append_string(frame_nb, currentGame.frame);
+		append_string(frame_nb, currentGame->frame);
 		string bullets_nb;
-		append_string(bullets_nb, Sint32(currentLevel.enemyBullets.size()), 4);
+		append_string(bullets_nb, Sint32(currentLevel->enemyBullets.size()), 4);
 		bullets_nb += " bullets";
 		string frameskip_nb = "frameskip ";
 		append_string(frameskip_nb, skipped);
@@ -338,33 +341,33 @@ void start()
 		
 		rythm.getUpdatedSurface()->drawAt(Point(20, 200));
 		ship.draw();
-		if (currentGame.show_hitbox)
+		if (currentGame->show_hitbox)
 		{
 			ship.drawHitbox(Colors::Green);
 		}
-		for (ListEnemy::const_iterator ennn = currentLevel.enemies.begin(); ennn != currentLevel.enemies.end(); ++ennn)
+		for (ListEnemy::const_iterator ennn = currentLevel->enemies.begin(); ennn != currentLevel->enemies.end(); ++ennn)
 		{
 			(*ennn)->display();
-			if (currentGame.show_hitbox)
+			if (currentGame->show_hitbox)
 			{
 				(*ennn)->drawHitbox(Colors::Black);
 			}
 		}
 		const Rect shipHb = ship.getScreenHitbox();
-		ListBullet::iterator i = currentLevel.enemyBullets.begin();
-		while (i != currentLevel.enemyBullets.end())
+		ListBullet::iterator i = currentLevel->enemyBullets.begin();
+		while (i != currentLevel->enemyBullets.end())
 		{
 			Bullet *b = *i;
 			b->update();
 			if (b->isDead())
 			{
 				delete b;
-				i = currentLevel.enemyBullets.erase(i);
+				i = currentLevel->enemyBullets.erase(i);
 			}
 			else
 			{
 				b->getSprite()->draw();
-				if (currentGame.show_hitbox)
+				if (currentGame->show_hitbox)
 				{
 					b->getSprite()->drawHitbox(Colors::Black);
 				}
@@ -372,7 +375,7 @@ void start()
 				if (Rect::intersects(shipHb, bHb))
 				{
 					delete b;
-					i = currentLevel.enemyBullets.erase(i);
+					i = currentLevel->enemyBullets.erase(i);
 					hitCount++;
 				}
 				else
@@ -381,14 +384,14 @@ void start()
 				}
 			}
 		}
-		ListBullet::iterator j = currentLevel.myBullets.begin();
-		while (j != currentLevel.myBullets.end())
+		ListBullet::iterator j = currentLevel->myBullets.begin();
+		while (j != currentLevel->myBullets.end())
 		{
 			Bullet *b = *j;
 			b->update();
 			if (b->getSprite()->outOfScreen())
 			{
-				j = currentLevel.myBullets.erase(j);
+				j = currentLevel->myBullets.erase(j);
 				delete b;
 			}
 			else
@@ -396,13 +399,13 @@ void start()
 				bool deleted = false;
 				b->getSprite()->draw();
 				const Rect bHb = b->getSprite()->getScreenHitbox();
-				for (ListEnemy::iterator enn = currentLevel.enemies.begin(); enn != currentLevel.enemies.end(); ++enn)
+				for (ListEnemy::iterator enn = currentLevel->enemies.begin(); enn != currentLevel->enemies.end(); ++enn)
 				{
-					const bool hit = (*enn)->collidesWith(b);
+					const bool hit = (*enn)->collisionTest(b);
 					if (hit)
 					{
 						delete b;
-						j = currentLevel.myBullets.erase(j);
+						j = currentLevel->myBullets.erase(j);
 						deleted = true;
 						break;
 					}
@@ -413,6 +416,11 @@ void start()
 				}
 			}
 		}
+		Point lg(30, 40);
+		Point pc = currentLevel->playerShip->getCenter();
+		Laser l(lg, Point::angleBetween(lg, pc));
+		l.draw();
+		Screen::drawLine(lg, pc, Colors::Yellow);
 		font.drawString(frame_nb, Point(0, 0));
 		font.drawString(bullets_nb, Point(0, 17));
 		font.drawString(frameskip_nb, Point(0, 34));
@@ -424,7 +432,7 @@ void start()
 			printMemoryUsage();
 		}
 		*/
-		if (currentGame.frame % 300 == 0)
+		if (currentGame->frame % 300 == 0)
 		{
 			//SoundManager::playSfx(&hit);
 		}
@@ -438,7 +446,7 @@ void start()
 			Screen::setPixel(Point(0, 0), Colors::Black);
 		}
 		Screen::flip();
-		currentGame.frame++;
+		currentGame->frame++;
 	}
 }
 

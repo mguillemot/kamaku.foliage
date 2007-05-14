@@ -7,6 +7,7 @@
 
 Foliage::Surface *Enemy::surface_ship[16];
 Foliage::Surface *Enemy::surface_turret[16];
+Foliage::Point Enemy::turret_position[16];
 
 Enemy::Enemy(const GameColor c)
 {
@@ -57,27 +58,33 @@ Enemy::Enemy(const GameColor c)
 	//const Foliage::Rect hitbox(4, 13, 30, 15);
     //_sprite->setHitbox(hitbox);
 	_turret = new Foliage::Sprite(surface_turret[0]);
+	_cran = -1;
 	updateTurret();
 }
 
 Enemy::~Enemy()
 {
     delete _sprite;
+	delete _turret;
 }
 
 void Enemy::updateTurret()
 {
-	Foliage::Screen::drawLine(_sprite->getCenter(), currentLevel.playerShip->getCenter(), Foliage::Colors::White);
-	Foliage::Fixed angleToPlayer = Foliage::Point::angleBetween(_sprite->getCenter(), currentLevel.playerShip->getCenter());
+	//Foliage::Screen::drawLine(_sprite->getCenter(), currentLevel.playerShip->getCenter(), Foliage::Colors::White);
+	Foliage::Fixed angleToPlayer = Foliage::Point::angleBetween(_sprite->getCenter(), currentLevel->playerShip->getCenter());
 	angleToPlayer *= Sint16(8);
 	angleToPlayer /= F_PI;
-	Sint32 cran = -Sint32(angleToPlayer);
+	Sint16 cran = - angleToPlayer.round();
 	if (cran < 0)
 	{
 		cran += 16;
 	}
-	_turret->changeFrame(surface_turret[cran]);
-    _turretPosition = _sprite->getCenter(); //TEMP
+	if (cran != _cran)
+	{
+		_turret->changeFrame(surface_turret[cran]);
+		_turretPosition = turret_position[cran] + getPosition();
+		_cran = cran;
+	}
 }
 
 void Enemy::loadSurfaces()
@@ -114,6 +121,22 @@ void Enemy::loadSurfaces()
 	surface_turret[13] = Foliage::BitmapLoader::loadBitmap("cewt_td.bmp");
 	surface_turret[14] = Foliage::BitmapLoader::loadBitmap("cewt_te.bmp");
 	surface_turret[15] = Foliage::BitmapLoader::loadBitmap("cewt_tf.bmp");
+	turret_position[0] = Foliage::Point(59, 33);
+	turret_position[1] = Foliage::Point(57, 22);
+	turret_position[2] = Foliage::Point(52, 13);
+	turret_position[3] = Foliage::Point(42, 7);
+	turret_position[4] = Foliage::Point(31, 4);
+	turret_position[5] = Foliage::Point(20, 6);
+	turret_position[6] = Foliage::Point(11, 13);
+	turret_position[7] = Foliage::Point(5, 23);
+	turret_position[8] = Foliage::Point(4, 34);
+	turret_position[9] = Foliage::Point(5, 44);
+	turret_position[10] = Foliage::Point(10, 53);
+	turret_position[11] = Foliage::Point(20, 58);
+	turret_position[12] = Foliage::Point(32, 59);
+	turret_position[13] = Foliage::Point(41, 58);
+	turret_position[14] = Foliage::Point(50, 53);
+	turret_position[15] = Foliage::Point(57, 44);
 }
 
 bool Enemy::isDead() const
@@ -138,7 +161,7 @@ void Enemy::setSpeed(const Foliage::Speed s)
 	_turret->setSpeed(s);
 }
 
-bool Enemy::collidesWith(const Bullet *b)
+bool Enemy::collisionTest(const Bullet *b)
 {
 	bool collides = false;
 	const Foliage::Rect bHb = b->getSprite()->getScreenHitbox();
@@ -181,11 +204,10 @@ void Enemy::display() const
 Bullet *Enemy::fireAt(const Foliage::Point p, const Foliage::Fixed speed, const Foliage::Fixed shift_angle, const BulletType bulletType) const
 {
 	const Foliage::Point pos = _sprite->getPosition();
-	//const Foliage::Point from(pos.x + _turretPosition.x, pos.y + _turretPosition.y); //TEMP
 	const Foliage::Point from = _turretPosition;
 	const Foliage::Fixed angle = Foliage::Point::angleBetween(from, p) + shift_angle;
     Bullet *shot = new BulletGenerator(from, angle, speed, bulletType);
-    currentLevel.enemyBullets.push_back(shot);
+    currentLevel->enemyBullets.push_back(shot);
     return shot;
 }
 
@@ -203,9 +225,9 @@ void Enemy::update()
     {
         _killedDuration++;
     }
-	else if (currentGame.frame % 50 == 0)
+	else if (currentGame->frame % 50 == 0)
     {
-		fireAt(currentLevel.playerShip->getCenter(), Foliage::Fixed(Sint16(2)), F_0, Bullet_Green_0);
+		fireAt(currentLevel->playerShip->getCenter(), Foliage::Fixed(Sint16(2)), F_0, Bullet_Green_0);
 		//fireAt(currentLevel.playerShip->getCenter(), Foliage::Fixed(Sint16(10)), F_0, Bullet_Standard);
 		//fireAt(currentLevel.playerShip->getCenter(), Foliage::Fixed(Sint16(10)), Foliage::Fixed(0.2f), Bullet_Standard);
 		//fireAt(currentLevel.playerShip->getCenter(), Foliage::Fixed(Sint16(10)), Foliage::Fixed(-0.2f), Bullet_Standard);

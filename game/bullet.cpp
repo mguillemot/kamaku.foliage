@@ -86,11 +86,11 @@ void BulletGenerator::update()
 		Foliage::Fixed space = F_TWOPI;
 		space /= Sint16(N);
 		Foliage::Fixed angle;
-		const Foliage::Fixed speed(Sint16(4));
+		const Foliage::Fixed speed(2.5f);
 		for (int i = 0; i < N; i++)
 		{
 			Bullet *shot = new Bullet(from, angle, speed, Bullet_Standard);
-			currentLevel.enemyBullets.push_back(shot);
+			currentLevel->enemyBullets.push_back(shot);
 			angle += space;
 		}
 	}

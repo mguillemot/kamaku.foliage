@@ -62,6 +62,11 @@ namespace Foliage
 			}
 			return angle;
 		}
+
+		const Point operator+(const Point s) const
+		{
+			return Point(x + s.x, y + s.y);
+		}
 	};
 	
 	struct Speed
@@ -101,6 +106,14 @@ namespace Foliage
 		{
 			x += shift.x;
 			y += shift.y;
+		}
+
+		Point center() const
+		{
+			Point p(x, y);
+			p.x += w >> 1;
+			p.y += h >> 1;
+			return p;
 		}
 		
 		static bool intersects(const Rect &a, const Rect &b);

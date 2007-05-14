@@ -6,6 +6,7 @@
 #include "enemy.hpp"
 #include "foliage.hpp"
 #include "bullet.hpp"
+#include "laser.hpp"
 
 struct Game
 {
@@ -28,6 +29,7 @@ public:
 	Game            *game;
 	ListBullet       enemyBullets;
 	ListBullet       myBullets;
+	ListLaser        enemyLasers;
 	Foliage::Sprite *playerShip;
 	Sint32           time;
 	ListEnemy        enemies;
@@ -44,12 +46,14 @@ public:
 			delete *i;
 		}*/
 		myBullets.clear();
+		// todo
+		enemyLasers.clear();
 		time = 0;
 		enemies.clear();
 	}
 };
 
-extern Game currentGame;
-extern Level currentLevel;
+extern Game *currentGame;
+extern Level *currentLevel;
 
 #endif //__GAME_GLOBALS

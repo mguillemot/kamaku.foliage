@@ -149,7 +149,7 @@ namespace Foliage
 
 	void printMemoryUsage();
 
-	enum MemoryPersistance { Eternal, Level };
+	enum MemoryPersistance { Eternal, LevelOnly };
 
 }
 

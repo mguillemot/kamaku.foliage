@@ -18,11 +18,12 @@ public:
     void         explode();
 	bool         isDead() const;
 	bool         hasDisappeared() const;
-	virtual bool collidesWith(const Bullet *b);
+	virtual bool collisionTest(const Bullet *b);
 	virtual void drawHitbox(const Foliage::Color color) const;
 	GameColor    getColor() const { return _color; }
 	Foliage::Size getSize() const { return _sprite->getSize(); }
 	virtual void setPosition(const Foliage::Point p);
+	virtual Foliage::Point getPosition() const { return _sprite->getPosition(); }
 	virtual void setSpeed(const Foliage::Speed s);
 
 	static void loadSurfaces();
@@ -35,11 +36,13 @@ protected:
     Sint32           _life;
 	GameColor        _color;
 	Foliage::Rect    _hitbox[3];//TBH
+	Sint16           _cran; //TBH
 
 	void         updateTurret();
 
 	static Foliage::Surface *surface_ship[16]; //TO BE HERITED
 	static Foliage::Surface *surface_turret[16]; //TO BE HERITED
+	static Foliage::Point turret_position[16]; //TO BE HERITED
 };
 
 typedef std::list<Enemy *> ListEnemy;

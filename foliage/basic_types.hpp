@@ -85,6 +85,18 @@ namespace Foliage
 		const Fixed operator/(const Sint16 i) const { return Fixed(*this) /= i; }
 		
 		const Fixed opposite() const { return Fixed(true, -v); }
+		const Sint16 round() const
+		{ 
+			Uint32 firstDecimal = (v & (1 << 15));
+			if (firstDecimal != 0)
+			{
+				return (v >> 16) + 1;
+			}
+			else
+			{
+				return (v >> 16);
+			}
+		}
 		
 		bool operator<(const Fixed &fix) const { return (v < fix.v); }
 		bool operator<(const Sint16 i) const { return (v < (i << 16)); }
