@@ -49,13 +49,11 @@ void append_string(string &s, Sint32 n, Sint32 min_len = 1)
 
 void start()
 {
-	/*
 	Foliage::Sound bg("kloops.wav");
 	cout << "bg music has " << bg.getSamplesNb() << " samples" << endl;
 	Foliage::Sound hit("break.wav");
 	cout << "SFX has " << hit.getSamplesNb() << " samples" << endl;
-	*/
-	SoundManager::disableSound();
+	//SoundManager::disableSound();
 
 	Bullet::loadBulletSurfaces();
 	Enemy::loadSurfaces();
@@ -98,7 +96,7 @@ void start()
 	e->setPosition(Point(100, 100));
 	currentLevel->enemies.push_back(e);
 
-	//SoundManager::playBg(&bg);		
+	SoundManager::playBg(&bg);		
 	
 	while (true)
 	{
@@ -434,7 +432,7 @@ void start()
 		*/
 		if (currentGame->frame % 300 == 0)
 		{
-			//SoundManager::playSfx(&hit);
+			SoundManager::playSfx(&hit);
 		}
 		skipped = Screen::waitUntilEndOfFrame();
 		if (skipped > 0)

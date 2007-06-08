@@ -65,7 +65,13 @@ Foliage::Sound::Sound(const std::string filename)
 	RIFFCHUNK riffchunk;
 	FMTCHUNK fmtchunk;
 	DATACHUNK datachunk;
-	FILE *infile = fopen(filename.c_str(), "r");
+	FILE *infile;
+	#ifdef __PPC__
+		infile = fopen(filename.c_str(), "r");
+	#else
+		std::string filename2 = "../game/resources/" + filename;
+		infile = fopen(filename2.c_str(), "rb");
+	#endif
 	if (infile == NULL)
 	{
 		std::cout << "Couldn't open file " << filename << std::endl;
