@@ -27,19 +27,19 @@ Bullet::Bullet(const Foliage::Point position, const Foliage::Fixed direction, co
 	: _direction(direction)
 {
 	_dead = false;
-    _sprite = new Foliage::Sprite(_bulletSurfaces[type]);
+    _sprite = new Foliage::SimpleSprite(_bulletSurfaces[type]);
     const Foliage::Size size = _sprite->getSize();
 	if (type >= 0 && type <= 3)
 	{
 		// enemy round bullet (8x8)
 		const Foliage::Rect bulletHitbox = Foliage::Rect(2, 2, 4, 4);
-		_sprite->setHitbox(bulletHitbox);
+		_sprite->getHitbox()->addRect(bulletHitbox);
 	}
 	else
 	{
 		// my digital bullets (6x9)
 		const Foliage::Rect bulletHitbox = Foliage::Rect(0, 0, 6, 9);
-		_sprite->setHitbox(bulletHitbox);
+		_sprite->getHitbox()->addRect(bulletHitbox);
 	}    
     _sprite->setPosition(Foliage::Point(position.x - (size.w >> 1), position.y - (size.h >> 1)));
     setSpeed(speed);
@@ -59,7 +59,7 @@ void Bullet::updateSpriteSpeed()
 
 void Bullet::update()
 {
-    _sprite->move();
+    _sprite->update();
 }
 
 void Bullet::setSpeed(const Foliage::Fixed speed)

@@ -79,6 +79,106 @@ Foliage::Fixed Foliage::FastMath::atan(const Foliage::Fixed x)
 	}
 }
 
+Foliage::Direction Foliage::FastMath::direction(const Sint16 dx, const Sint16 dy)
+{
+	return direction(Foliage::Fixed(dx), Foliage::Fixed(dy));
+}
+
+Foliage::Direction Foliage::FastMath::direction(const Foliage::Fixed dx, const Foliage::Fixed dy)
+{
+	if (dx == F_0)
+	{
+		if (dy > F_0)
+		{
+			return DIR_S;
+		}
+		else
+		{
+			return DIR_N;
+		}
+	}
+	else if (dx > F_0)
+	{
+		const Foliage::Fixed tt = dy.opposite() / dx;
+		if (tt <= F_TAN_7_PI_OVER_16.opposite())
+		{
+			return Foliage::Direction(12);
+		}
+		else if (tt <= F_TAN_5_PI_OVER_16.opposite())
+		{
+			return Foliage::Direction(13);
+		}
+		else if (tt <= F_TAN_3_PI_OVER_16.opposite())
+		{
+			return Foliage::Direction(14);
+		}
+		else if (tt <= F_TAN_PI_OVER_16.opposite())
+		{
+			return Foliage::Direction(15);
+		}
+		else if (tt <= F_TAN_PI_OVER_16)
+		{
+			return Foliage::Direction(0);
+		}
+		else if (tt <= F_TAN_3_PI_OVER_16)
+		{
+			return Foliage::Direction(1);
+		}
+		else if (tt <= F_TAN_5_PI_OVER_16)
+		{
+			return Foliage::Direction(2);
+		}
+		else if (tt <= F_TAN_7_PI_OVER_16)
+		{
+			return Foliage::Direction(3);
+		}
+		else
+		{
+			return Foliage::Direction(4);
+		}
+	}
+	else
+	{
+		const Foliage::Fixed tt = dy / dx;
+		if (tt <= F_TAN_7_PI_OVER_16.opposite())
+		{
+			return Foliage::Direction(12);
+		}
+		else if (tt <= F_TAN_5_PI_OVER_16.opposite())
+		{
+			return Foliage::Direction(11);
+		}
+		else if (tt <= F_TAN_3_PI_OVER_16.opposite())
+		{
+			return Foliage::Direction(10);
+		}
+		else if (tt <= F_TAN_PI_OVER_16.opposite())
+		{
+			return Foliage::Direction(9);
+		}
+		else if (tt <= F_TAN_PI_OVER_16)
+		{
+			return Foliage::Direction(8);
+		}
+		else if (tt <= F_TAN_3_PI_OVER_16)
+		{
+			return Foliage::Direction(7);
+		}
+		else if (tt <= F_TAN_5_PI_OVER_16)
+		{
+			return Foliage::Direction(6);
+		}
+		else if (tt <= F_TAN_7_PI_OVER_16)
+		{
+			return Foliage::Direction(5);
+		}
+		else
+		{
+			return Foliage::Direction(4);
+		}
+	}
+}
+
 void Foliage::FastMath::init()
 {
 	for (Sint32 i = 0; i < 1000; i++)

@@ -9,6 +9,8 @@
 #include "rythm_display.hpp"
 #include "game_globals.hpp"
 #include "laser.hpp"
+#include "map.hpp"
+#include "jauge.hpp"
 
 #ifdef main
 #undef main
@@ -56,7 +58,10 @@ void start()
 	//SoundManager::disableSound();
 
 	Bullet::loadBulletSurfaces();
-	Enemy::loadSurfaces();
+	ColoredEnemy::loadSurfaces();
+	DonutEnemy::loadSurfaces();
+	FlyerEnemy::loadSurfaces();
+	TankEnemy::loadSurfaces();
 
 	currentGame = new Game();
 	currentGame->reset();
@@ -66,22 +71,26 @@ void start()
 	Sint32 skipped = 0;
     Font font;
     cout << "Font loaded." << endl;
-    Foliage::Sprite background("bg.bmp"); // 300x3910
+	Map map(BitmapLoader::loadBitmap("bg.bmp"));
+
+	//Foliage::SimpleSprite background(); // 300x3910
 	#ifdef __PPC
 		Foliage::Sprite background1(background.getCurrentSurface()->createNewShiftedSurface(1));
 		Foliage::Sprite background2(background.getCurrentSurface()->createNewShiftedSurface(2));
 		Foliage::Sprite background3(background.getCurrentSurface()->createNewShiftedSurface(3));
 	#endif
-	Foliage::Sprite ship("vaiss00.bmp");
+	Foliage::AnimatedSprite ship(6);
 	currentLevel->playerShip = &ship;
-	ship.addFrame("vaiss01.bmp");
-	ship.addFrame("vaiss02.bmp");
-	ship.addFrame("vaiss03.bmp");
-	ship.addFrame("vaiss04.bmp");
-	ship.addFrame("vaiss05.bmp");
+	ship.addFrame(BitmapLoader::loadBitmap("vaiss00.bmp"));
+	ship.addFrame(BitmapLoader::loadBitmap("vaiss01.bmp"));
+	ship.addFrame(BitmapLoader::loadBitmap("vaiss02.bmp"));
+	ship.addFrame(BitmapLoader::loadBitmap("vaiss03.bmp"));
+	ship.addFrame(BitmapLoader::loadBitmap("vaiss04.bmp"));
+	ship.addFrame(BitmapLoader::loadBitmap("vaiss05.bmp"));
     Rect shipHitbox = Rect(10, 11, 8, 9);
-    ship.setHitbox(shipHitbox);
+	ship.getHitbox()->addRect(shipHitbox);
     ship.setPosition(Point(100, 250));
+	ship.setConstrained(true);
 	Speed s;
 	const Fixed ShipSpeed = Fixed(1.5f);
 	Sint32 hitCount = 0;
@@ -91,15 +100,17 @@ void start()
 	const Fixed ShotSpeed = Fixed(Sint16(10));
 	const Fixed LaserSpeed = Fixed(Sint16(20));
 	RythmDisplay rythm;
-
-	Enemy *e = new Enemy();
-	e->setPosition(Point(100, 100));
+	Jauge jaugeLaser(100);
+	Enemy *e = new DonutEnemy();
+	e->setPosition(Point(100, 40));
 	currentLevel->enemies.push_back(e);
 
-	SoundManager::playBg(&bg);		
+	//SoundManager::playBg(&bg);		
 	
 	while (true)
 	{
+		Synchronizator waitEndOfBg = map.asyncDraw();
+
 		rythm.nextFrame();
 
 		while (Foliage::InputManager::numberOfEvents() > 0)
@@ -193,35 +204,7 @@ void start()
 			framesBeforeLaser1--;
 		}
 		ship.setSpeed(s);
-		Rect section;
-		section.w = 240;
-		section.h = 320;
-		section.x = ship.getPosition().x / 4;
-		section.y = background.getSize().h - 320 - currentGame->frame;
-		if (section.y < 0)
-			section.y = 0;
-		Synchronizator waitEndOfBg;
-		#ifdef __PPC__
-			if (section.y % 4 == 0)
-			{
-				waitEndOfBg = Screen::asyncBlitSection(background.getCurrentSurface(), section, Point(0, 0));
-			}
-			else if (section.y % 4 == 1)
-			{
-				waitEndOfBg = Screen::asyncBlitSection(background3.getCurrentSurface(), section, Point(0, 0));
-			}
-			else if (section.y % 4 == 2)
-			{
-				waitEndOfBg = Screen::asyncBlitSection(background2.getCurrentSurface(), section, Point(0, 0));
-			}
-			else
-			{
-				waitEndOfBg = Screen::asyncBlitSection(background1.getCurrentSurface(), section, Point(0, 0));
-			}
-		#else
-			waitEndOfBg = Screen::asyncBlitSection(background.getCurrentSurface(), section, Point(0, 0));
-		#endif
-		ship.move();
+		ship.update();
 		ListEnemy::iterator enn = currentLevel->enemies.begin();
 		while (enn != currentLevel->enemies.end())
 		{
@@ -281,7 +264,7 @@ void start()
 			laser.h = ship.getCenter().y - 15;
 			Screen::fillRect(laser, Colors::Green);
 		}
-		if ((currentGame->frame % 25) == 250) // pop new enemies//TEMP:desactivated
+		if ((currentGame->frame % 25) == 0) // pop new enemies//TEMP:desactivated
 		{
 			GameColor c;
 			Sint32 r = rand() % 100;
@@ -317,10 +300,11 @@ void start()
 			{
 				c = Black;
 			}
-			Enemy *e = new Enemy(c);
+			//Enemy *e = new ColoredEnemy(c);
+			Enemy *e = new FlyerEnemy();
 			Sint16 sx = (rand() % 3) - 1;
 			Sint16 sy = (rand() % 4) + 1;
-			e->setPosition(Point((rand() % 150) + 1 - e->getSize().h, 0));
+			e->setPosition(Point((rand() % 200) + 20, 1 - e->getSize().h));
 			e->setSpeed(Speed(Fixed(sx), Fixed(sy)));
 			currentLevel->enemies.push_back(e);
 		}
@@ -351,7 +335,6 @@ void start()
 				(*ennn)->drawHitbox(Colors::Black);
 			}
 		}
-		const Rect shipHb = ship.getScreenHitbox();
 		ListBullet::iterator i = currentLevel->enemyBullets.begin();
 		while (i != currentLevel->enemyBullets.end())
 		{
@@ -369,8 +352,7 @@ void start()
 				{
 					b->getSprite()->drawHitbox(Colors::Black);
 				}
-				Rect bHb = b->getSprite()->getScreenHitbox();
-				if (Rect::intersects(shipHb, bHb))
+				if (Sprite::collisionTest(&ship, b->getSprite()))
 				{
 					delete b;
 					i = currentLevel->enemyBullets.erase(i);
@@ -396,11 +378,10 @@ void start()
 			{
 				bool deleted = false;
 				b->getSprite()->draw();
-				const Rect bHb = b->getSprite()->getScreenHitbox();
 				for (ListEnemy::iterator enn = currentLevel->enemies.begin(); enn != currentLevel->enemies.end(); ++enn)
 				{
-					const bool hit = (*enn)->collisionTest(b);
-					if (hit)
+					Enemy *enemy = *enn;
+					if (enemy->collisionTest(b))
 					{
 						delete b;
 						j = currentLevel->myBullets.erase(j);
@@ -419,6 +400,7 @@ void start()
 		Laser l(lg, Point::angleBetween(lg, pc));
 		l.draw();
 		Screen::drawLine(lg, pc, Colors::Yellow);
+		jaugeLaser.getUpdatedSurface()->drawAt(Point(10, 290));
 		font.drawString(frame_nb, Point(0, 0));
 		font.drawString(bullets_nb, Point(0, 17));
 		font.drawString(frameskip_nb, Point(0, 34));
@@ -432,7 +414,7 @@ void start()
 		*/
 		if (currentGame->frame % 300 == 0)
 		{
-			SoundManager::playSfx(&hit);
+			//SoundManager::playSfx(&hit);
 		}
 		skipped = Screen::waitUntilEndOfFrame();
 		if (skipped > 0)
@@ -444,6 +426,8 @@ void start()
 			Screen::setPixel(Point(0, 0), Colors::Black);
 		}
 		Screen::flip();
+		map.update();
+		jaugeLaser.setValue(jaugeLaser.getValue() + 1);
 		currentGame->frame++;
 	}
 }

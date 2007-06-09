@@ -8,6 +8,8 @@
 #include "bullet.hpp"
 #include "laser.hpp"
 
+class Map;
+
 struct Game
 {
 	Sint32 lives;
@@ -33,6 +35,7 @@ public:
 	Foliage::Sprite *playerShip;
 	Sint32           time;
 	ListEnemy        enemies;
+	Map             *map;
 
 	void reset()
 	{

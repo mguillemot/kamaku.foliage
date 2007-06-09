@@ -14,7 +14,7 @@ class RythmDisplay
 public:
 	RythmDisplay()
 	{
-		_representation = Foliage::Surface::createSurface(Foliage::Size(RYTHMDISPLAY_WIDTH, RYTHMDISPLAY_HEIGHT), "rythm");
+		_representation = Foliage::Surface::createEmptySurface(Foliage::Size(RYTHMDISPLAY_WIDTH, RYTHMDISPLAY_HEIGHT), "rythm");
 		Foliage::Fixed beat;
 		const Foliage::Fixed interval = Foliage::Fixed(Sint16(60)); //TEMP
 		for (int i = 0; i < 100; i++)

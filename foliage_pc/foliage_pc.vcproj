@@ -220,6 +220,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\game\map.hpp"
+				>
+			</File>
+			<File
 				RelativePath="..\game\rythm_display.hpp"
 				>
 			</File>
@@ -232,23 +236,7 @@
 			Name="foliage"
 			>
 			<File
-				RelativePath="..\foliage\basic_types.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\foliage\basic_types.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\foliage\leaf_graphic\bitmap_loader.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\foliage\leaf_graphic\bitmap_loader.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\foliage\leaf_graphic\colors.hpp"
 				>
 			</File>
 			<File
@@ -268,42 +256,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\foliage\leaf_graphic\graphic_types.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\foliage\leaf_graphic\instancizator.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\foliage\leaf_graphic\instancizator.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\foliage\leaf_io\keyboard_fr.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\foliage\leaf_graphic\leaf_graphic.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\foliage\leaf_io\leaf_io.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\foliage\leaf_io\leaf_io.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\foliage\leaf_sound\leaf_sound.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\foliage\leaf_sound\leaf_sound.hpp"
-				>
-			</File>
-			<File
 				RelativePath="..\foliage\memory.cpp"
 				>
 			</File>
@@ -316,39 +268,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\foliage\leaf_graphic\screen.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\foliage\leaf_graphic\screen.hpp"
-				>
-			</File>
-			<File
 				RelativePath="..\foliage\settings.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\foliage\leaf_sound\sound.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\foliage\leaf_sound\sound.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\foliage\leaf_graphic\sprite.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\foliage\leaf_graphic\sprite.hpp"
-				>
-			</File>
-			<File
-				RelativePath="..\foliage\leaf_graphic\surface.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\foliage\leaf_graphic\surface.hpp"
 				>
 			</File>
 			<File
@@ -359,6 +279,106 @@
 				RelativePath="..\foliage\timer.hpp"
 				>
 			</File>
+			<Filter
+				Name="leaf_io"
+				>
+				<File
+					RelativePath="..\foliage\leaf_io\keyboard_fr.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\foliage\leaf_io\leaf_io.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\foliage\leaf_io\leaf_io.hpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="leaf_graphic"
+				>
+				<File
+					RelativePath="..\foliage\leaf_graphic\animation.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\foliage\leaf_graphic\bitmap_loader.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\foliage\leaf_graphic\bitmap_loader.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\foliage\leaf_graphic\colors.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\foliage\leaf_graphic\graphic_types.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\foliage\leaf_graphic\hitbox.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\foliage\leaf_graphic\instancizator.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\foliage\leaf_graphic\instancizator.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\foliage\leaf_graphic\leaf_graphic.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\foliage\leaf_graphic\rotative_surface.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\foliage\leaf_graphic\screen.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\foliage\leaf_graphic\screen.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\foliage\leaf_graphic\sprite.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\foliage\leaf_graphic\surface.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\foliage\leaf_graphic\surface.hpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="leaf_sound"
+				>
+				<File
+					RelativePath="..\foliage\leaf_sound\leaf_sound.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\foliage\leaf_sound\leaf_sound.hpp"
+					>
+				</File>
+				<File
+					RelativePath="..\foliage\leaf_sound\sound.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\foliage\leaf_sound\sound.hpp"
+					>
+				</File>
+			</Filter>
 		</Filter>
 	</Files>
 	<Globals>

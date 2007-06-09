@@ -12,21 +12,49 @@ public:
 	Jauge(const Sint32 max)
 		: _max(max), _value(0)
 	{
-		_representation = Foliage::Surface::createSurface(Foliage::Size(JAUGE_WIDTH, JAUGE_HEIGHT), "jauge");
+		_representation = Foliage::Surface::createEmptySurface(Foliage::Size(JAUGE_WIDTH, JAUGE_HEIGHT), "jauge");
 	}
 
-	void setValue(const Sint32 value) { _value = value; }
-	Sint32 getValue() const { return _value; }
+	void setValue(const Sint32 value)
+	{ 
+		if (value > _max)
+		{
+			_value = _max;
+		}
+		else if (value < 0)
+		{
+			_value = 0;
+		}
+		else
+		{
+			_value = value;
+		}
+	}
+	
+	Sint32 getValue() const 
+	{ 
+		return _value; 
+	}
 
-	Foliage::Surface *getUpdatedSurface
+	Foliage::Surface *getUpdatedSurface()
 	{
 		_representation->fill(Foliage::Colors::Transparent);
-
+		_representation->drawRect(Foliage::Rect(0, 0, JAUGE_WIDTH, JAUGE_HEIGHT), Foliage::Colors::Black);
+		Foliage::Fixed percent(_value);
+		percent /= _max;
+		percent *= Sint16(JAUGE_WIDTH);
+		Sint16 l = Sint16(percent) - 1;
+		if (l == JAUGE_WIDTH - 1)
+		{
+			l--;
+		}
+		_representation->fillRect(Foliage::Rect(1, 1, l, JAUGE_HEIGHT - 2), Foliage::Colors::Red);
+		return _representation;
 	}
 
 private:
-	Sint32 _value;
-	Sint32 _max;
+	Sint16 _value;
+	Sint16 _max;
 	Foliage::Surface *_representation;
 };
 

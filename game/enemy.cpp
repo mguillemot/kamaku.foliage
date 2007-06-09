@@ -5,15 +5,85 @@
 #include "game_globals.hpp"
 #include "bullet.hpp"
 
-Foliage::Surface *Enemy::surface_ship[16];
-Foliage::Surface *Enemy::surface_turret[16];
-Foliage::Point Enemy::turret_position[16];
+///// BASE CLASS /////
 
-Enemy::Enemy(const GameColor c)
+Enemy::Enemy()
 {
-	_color = c;
 	_killedDuration = 0;
 	_life = 100;
+}
+
+Enemy::~Enemy()
+{
+}
+
+bool Enemy::isDead() const
+{ 
+	return (_life <= 0);
+}
+
+bool Enemy::hasDisappeared() const
+{
+	return (_killedDuration >= 10 || _sprite->outOfScreen());
+}
+
+void Enemy::setPosition(const Foliage::Point p)
+{
+	_sprite->setPosition(p);
+}
+
+void Enemy::setSpeed(const Foliage::Speed s)
+{
+	_sprite->setSpeed(s);
+}
+
+void Enemy::display() const
+{
+	_sprite->draw();
+}
+
+bool Enemy::collisionTest(Bullet *b)
+{
+	return Foliage::Sprite::collisionTest(_sprite, b->getSprite());
+}
+
+void Enemy::drawHitbox(const Foliage::Color color) const
+{
+	_sprite->drawHitbox(color);
+}
+
+Bullet *Enemy::fireAt(const Foliage::Point turret, const Foliage::Point target, const Foliage::Fixed speed, const Foliage::Fixed shift_angle, const BulletType bulletType) const
+{
+	Foliage::Fixed angle = Foliage::Point::angleBetween(turret, target) + shift_angle;
+	angle.normalizeAngle();
+    Bullet *shot = new BulletGenerator(turret, angle, speed, bulletType);
+    currentLevel->enemyBullets.push_back(shot);
+    return shot;
+}
+
+void Enemy::explode()
+{
+    _life = 0;
+}
+
+void Enemy::update()
+{
+	_sprite->update();
+    if (isDead())
+    {
+        _killedDuration++;
+    }
+}
+
+///// COLORED ENEMY /////
+
+void ColoredEnemy::loadSurfaces()
+{
+}
+
+ColoredEnemy::ColoredEnemy(const GameColor c)
+{
+	_life = 50;
 	/*
 	switch (c)
 	{
@@ -46,81 +116,61 @@ Enemy::Enemy(const GameColor c)
 		break;
 	}
 	*/
-	_sprite = new Foliage::Sprite(surface_ship[0]);
-	for (int i = 1; i <= 15; i++)
-	{
-		_sprite->addFrame(surface_ship[i]);
-	}
-	_sprite->setDelayBetweenFrames(3);
-	_hitbox[0] = Foliage::Rect(5, 17, 11, 32);
-	_hitbox[1] = Foliage::Rect(12, 48, 37, 11);
-	_hitbox[2] = Foliage::Rect(47, 17, 11, 32);
-	//const Foliage::Rect hitbox(4, 13, 30, 15);
-    //_sprite->setHitbox(hitbox);
-	_turret = new Foliage::Sprite(surface_turret[0]);
-	_cran = -1;
-	updateTurret();
+	_color = c;
+	//_sprite = new Foliage::Sprite(surface_ship[0]);
+	//_sprite->setDelayBetweenFrames(3);
+	const Foliage::Rect hitbox(4, 13, 30, 15);
+	_sprite->getHitbox()->addRect(hitbox);
 }
 
-Enemy::~Enemy()
+ColoredEnemy::~ColoredEnemy()
 {
     delete _sprite;
-	delete _turret;
 }
 
-void Enemy::updateTurret()
-{
-	//Foliage::Screen::drawLine(_sprite->getCenter(), currentLevel.playerShip->getCenter(), Foliage::Colors::White);
-	Foliage::Fixed angleToPlayer = Foliage::Point::angleBetween(_sprite->getCenter(), currentLevel->playerShip->getCenter());
-	angleToPlayer *= Sint16(8);
-	angleToPlayer /= F_PI;
-	Sint16 cran = - angleToPlayer.round();
-	if (cran < 0)
-	{
-		cran += 16;
-	}
-	if (cran != _cran)
-	{
-		_turret->changeFrame(surface_turret[cran]);
-		_turretPosition = turret_position[cran] + getPosition();
-		_cran = cran;
-	}
-}
+///// DONUT ENEMY /////
 
-void Enemy::loadSurfaces()
+Foliage::Surface         *DonutEnemy::surface_ship[16];
+Foliage::RotativeSurface *DonutEnemy::rotativeSurface_turret;
+Foliage::Point            DonutEnemy::turret_position[16];
+
+void DonutEnemy::loadSurfaces()
 {
-	surface_ship[0] = Foliage::BitmapLoader::loadBitmap("cewt01.bmp");
-	surface_ship[1] = Foliage::BitmapLoader::loadBitmap("cewt02.bmp");
-	surface_ship[2] = Foliage::BitmapLoader::loadBitmap("cewt03.bmp");
-	surface_ship[3] = Foliage::BitmapLoader::loadBitmap("cewt04.bmp");
-	surface_ship[4] = Foliage::BitmapLoader::loadBitmap("cewt05.bmp");
-	surface_ship[5] = Foliage::BitmapLoader::loadBitmap("cewt06.bmp");
-	surface_ship[6] = Foliage::BitmapLoader::loadBitmap("cewt07.bmp");
-	surface_ship[7] = Foliage::BitmapLoader::loadBitmap("cewt08.bmp");
-	surface_ship[8] = Foliage::BitmapLoader::loadBitmap("cewt09.bmp");
-	surface_ship[9] = Foliage::BitmapLoader::loadBitmap("cewt10.bmp");
-	surface_ship[10] = Foliage::BitmapLoader::loadBitmap("cewt11.bmp");
-	surface_ship[11] = Foliage::BitmapLoader::loadBitmap("cewt12.bmp");
 	surface_ship[12] = Foliage::BitmapLoader::loadBitmap("cewt13.bmp");
 	surface_ship[13] = Foliage::BitmapLoader::loadBitmap("cewt14.bmp");
 	surface_ship[14] = Foliage::BitmapLoader::loadBitmap("cewt15.bmp");
 	surface_ship[15] = Foliage::BitmapLoader::loadBitmap("cewt16.bmp");
-	surface_turret[0] = Foliage::BitmapLoader::loadBitmap("cewt_t0.bmp");
-	surface_turret[1] = Foliage::BitmapLoader::loadBitmap("cewt_t1.bmp");
-	surface_turret[2] = Foliage::BitmapLoader::loadBitmap("cewt_t2.bmp");
-	surface_turret[3] = Foliage::BitmapLoader::loadBitmap("cewt_t3.bmp");
-	surface_turret[4] = Foliage::BitmapLoader::loadBitmap("cewt_t4.bmp");
-	surface_turret[5] = Foliage::BitmapLoader::loadBitmap("cewt_t5.bmp");
-	surface_turret[6] = Foliage::BitmapLoader::loadBitmap("cewt_t6.bmp");
-	surface_turret[7] = Foliage::BitmapLoader::loadBitmap("cewt_t7.bmp");
-	surface_turret[8] = Foliage::BitmapLoader::loadBitmap("cewt_t8.bmp");
-	surface_turret[9] = Foliage::BitmapLoader::loadBitmap("cewt_t9.bmp");
-	surface_turret[10] = Foliage::BitmapLoader::loadBitmap("cewt_ta.bmp");
-	surface_turret[11] = Foliage::BitmapLoader::loadBitmap("cewt_tb.bmp");
-	surface_turret[12] = Foliage::BitmapLoader::loadBitmap("cewt_tc.bmp");
-	surface_turret[13] = Foliage::BitmapLoader::loadBitmap("cewt_td.bmp");
-	surface_turret[14] = Foliage::BitmapLoader::loadBitmap("cewt_te.bmp");
-	surface_turret[15] = Foliage::BitmapLoader::loadBitmap("cewt_tf.bmp");
+	surface_ship[0] = surface_ship[12]->createNewRotatedSurface(270);
+	surface_ship[1] = surface_ship[13]->createNewRotatedSurface(270);
+	surface_ship[2] = surface_ship[14]->createNewRotatedSurface(270);
+	surface_ship[3] = surface_ship[15]->createNewRotatedSurface(270);
+	surface_ship[4] = surface_ship[12]->createNewRotatedSurface(180);
+	surface_ship[5] = surface_ship[13]->createNewRotatedSurface(180);
+	surface_ship[6] = surface_ship[14]->createNewRotatedSurface(180);
+	surface_ship[7] = surface_ship[15]->createNewRotatedSurface(180);
+	surface_ship[8] = surface_ship[12]->createNewRotatedSurface(90);
+	surface_ship[9] = surface_ship[13]->createNewRotatedSurface(90);
+	surface_ship[10] = surface_ship[14]->createNewRotatedSurface(90);
+	surface_ship[11] = surface_ship[15]->createNewRotatedSurface(90);
+
+	rotativeSurface_turret = new Foliage::RotativeSurface();
+	rotativeSurface_turret->setSurface(Foliage::Direction(0), Foliage::BitmapLoader::loadBitmap("cewt_t0.bmp"));
+	rotativeSurface_turret->setSurface(Foliage::Direction(1), Foliage::BitmapLoader::loadBitmap("cewt_t1.bmp"));
+	rotativeSurface_turret->setSurface(Foliage::Direction(2), Foliage::BitmapLoader::loadBitmap("cewt_t2.bmp"));
+	rotativeSurface_turret->setSurface(Foliage::Direction(3), Foliage::BitmapLoader::loadBitmap("cewt_t3.bmp"));
+	rotativeSurface_turret->setSurface(Foliage::Direction(4), Foliage::BitmapLoader::loadBitmap("cewt_t4.bmp"));
+	rotativeSurface_turret->setSurface(Foliage::Direction(5), Foliage::BitmapLoader::loadBitmap("cewt_t5.bmp"));
+	rotativeSurface_turret->setSurface(Foliage::Direction(6), Foliage::BitmapLoader::loadBitmap("cewt_t6.bmp"));
+	rotativeSurface_turret->setSurface(Foliage::Direction(7), Foliage::BitmapLoader::loadBitmap("cewt_t7.bmp"));
+	rotativeSurface_turret->setSurface(Foliage::Direction(8), Foliage::BitmapLoader::loadBitmap("cewt_t8.bmp"));
+	rotativeSurface_turret->setSurface(Foliage::Direction(9), Foliage::BitmapLoader::loadBitmap("cewt_t9.bmp"));
+	rotativeSurface_turret->setSurface(Foliage::Direction(10), Foliage::BitmapLoader::loadBitmap("cewt_ta.bmp"));
+	rotativeSurface_turret->setSurface(Foliage::Direction(11), Foliage::BitmapLoader::loadBitmap("cewt_tb.bmp"));
+	rotativeSurface_turret->setSurface(Foliage::Direction(12), Foliage::BitmapLoader::loadBitmap("cewt_tc.bmp"));
+	rotativeSurface_turret->setSurface(Foliage::Direction(13), Foliage::BitmapLoader::loadBitmap("cewt_td.bmp"));
+	rotativeSurface_turret->setSurface(Foliage::Direction(14), Foliage::BitmapLoader::loadBitmap("cewt_te.bmp"));
+	rotativeSurface_turret->setSurface(Foliage::Direction(15), Foliage::BitmapLoader::loadBitmap("cewt_tf.bmp"));
+
 	turret_position[0] = Foliage::Point(59, 33);
 	turret_position[1] = Foliage::Point(57, 22);
 	turret_position[2] = Foliage::Point(52, 13);
@@ -139,97 +189,127 @@ void Enemy::loadSurfaces()
 	turret_position[15] = Foliage::Point(57, 44);
 }
 
-bool Enemy::isDead() const
-{ 
-	return (_life <= 0);
-}
-
-bool Enemy::hasDisappeared() const
+DonutEnemy::DonutEnemy()
 {
-	return (_killedDuration >= 10 || _sprite->outOfScreen());
-}
-
-void Enemy::setPosition(const Foliage::Point p)
-{
-	_sprite->setPosition(p);
-	_turret->setPosition(p);
-}
-
-void Enemy::setSpeed(const Foliage::Speed s)
-{
-	_sprite->setSpeed(s);
-	_turret->setSpeed(s);
-}
-
-bool Enemy::collisionTest(const Bullet *b)
-{
-	bool collides = false;
-	const Foliage::Rect bHb = b->getSprite()->getScreenHitbox();
-	const Foliage::Point pos = _sprite->getPosition();
-	for (int i = 0; i < 3; i++)
+	_life = 100;
+	Foliage::AnimatedSprite *s = new Foliage::AnimatedSprite(16);
+	for (int i = 0; i <= 15; i++)
 	{
-		Foliage::Rect h = _hitbox[i];
-		h.shift(pos);
-		if (Foliage::Rect::intersects(h, bHb))
-		{
-			collides = true;
-			break;
-		}
+		s->addFrame(surface_ship[i]);
 	}
-	if (collides)
-	{
-		_life -= 25;
-	}
-	return collides;
+	s->setDelayBetweenFrames(3);
+	s->getHitbox()->addRect(Foliage::Rect(5, 17, 11, 32));
+	s->getHitbox()->addRect(Foliage::Rect(12, 48, 37, 11));
+	s->getHitbox()->addRect(Foliage::Rect(47, 17, 11, 32));
+	_sprite = s;
+	_turret = new Foliage::RotativeSprite(rotativeSurface_turret);
+	_cran = -1;
+	updateTurret();
 }
 
-void Enemy::drawHitbox(const Foliage::Color color) const
+DonutEnemy::~DonutEnemy()
 {
-	const Foliage::Point pos = _sprite->getPosition();
-	for (int i = 0; i < 3; i++)
-	{
-		Foliage::Rect r = _hitbox[i];
-		r.shift(pos);
-		Foliage::Screen::fillRect(r, color);
-	}
+    delete _sprite;
+	delete _turret;
 }
 
-void Enemy::display() const
+void DonutEnemy::display() const
 {
-	_sprite->draw();
+	Enemy::display();
 	_turret->draw();
 }
 
-
-Bullet *Enemy::fireAt(const Foliage::Point p, const Foliage::Fixed speed, const Foliage::Fixed shift_angle, const BulletType bulletType) const
+void DonutEnemy::updateTurret()
 {
-	const Foliage::Point pos = _sprite->getPosition();
-	const Foliage::Point from = _turretPosition;
-	const Foliage::Fixed angle = Foliage::Point::angleBetween(from, p) + shift_angle;
-    Bullet *shot = new BulletGenerator(from, angle, speed, bulletType);
-    currentLevel->enemyBullets.push_back(shot);
-    return shot;
+	//Foliage::Fixed angleToPlayer = Foliage::Point::angleBetween(_sprite->getCenter(), currentLevel->playerShip->getCenter()).opposite();
+	//Sint16 cran = angleToPlayer.angleToDirection();
+	Sint16 dx = currentLevel->playerShip->getCenter().x - _sprite->getCenter().x;
+	Sint16 dy = currentLevel->playerShip->getCenter().y - _sprite->getCenter().y;
+	Foliage::Direction cran = Foliage::FastMath::direction(dx, dy);
+	if (cran != _cran)
+	{
+		_turret->setDirection(cran);
+		_cran = cran;
+	}
 }
 
-void Enemy::explode()
+void DonutEnemy::setPosition(const Foliage::Point p)
 {
-    _life = 0;
+	Enemy::setPosition(p);
+	_turret->setPosition(p);
 }
 
-void Enemy::update()
+void DonutEnemy::setSpeed(const Foliage::Speed s)
 {
+	Enemy::setSpeed(s);
+	_turret->setSpeed(s);
+}
+
+void DonutEnemy::update()
+{
+	Enemy::update();
 	updateTurret();
-	_sprite->move();
-	_turret->move();
-    if (isDead())
+	_turret->update();
+	if (!isDead() && currentGame->frame % 50 == 0)
     {
-        _killedDuration++;
+		Foliage::Point turret = getPosition() + turret_position[_cran];
+		fireAt(turret, currentLevel->playerShip->getCenter(), Foliage::Fixed(Sint16(2)), F_0, Bullet_Green_0);
     }
-	else if (currentGame->frame % 50 == 0)
-    {
-		fireAt(currentLevel->playerShip->getCenter(), Foliage::Fixed(Sint16(2)), F_0, Bullet_Green_0);
-		//fireAt(currentLevel.playerShip->getCenter(), Foliage::Fixed(Sint16(10)), F_0, Bullet_Standard);
-		//fireAt(currentLevel.playerShip->getCenter(), Foliage::Fixed(Sint16(10)), Foliage::Fixed(0.2f), Bullet_Standard);
-		//fireAt(currentLevel.playerShip->getCenter(), Foliage::Fixed(Sint16(10)), Foliage::Fixed(-0.2f), Bullet_Standard);
-    }
+}
+
+///// FLYER ENEMY /////
+
+Foliage::RotativeSurface *FlyerEnemy::rot_surface_ship;
+
+void FlyerEnemy::loadSurfaces()
+{
+	Foliage::Surface *surface_ship[16];	
+	surface_ship[12] = Foliage::BitmapLoader::loadBitmap("flyerc.bmp");
+	surface_ship[13] = Foliage::BitmapLoader::loadBitmap("flyerd.bmp");
+	surface_ship[14] = Foliage::BitmapLoader::loadBitmap("flyere.bmp");
+	surface_ship[15] = Foliage::BitmapLoader::loadBitmap("flyerf.bmp");
+	surface_ship[0] = surface_ship[12]->createNewRotatedSurface(270);
+	surface_ship[1] = surface_ship[13]->createNewRotatedSurface(270);
+	surface_ship[2] = surface_ship[14]->createNewRotatedSurface(270);
+	surface_ship[3] = surface_ship[15]->createNewRotatedSurface(270);
+	surface_ship[4] = surface_ship[12]->createNewRotatedSurface(180);
+	surface_ship[5] = surface_ship[13]->createNewRotatedSurface(180);
+	surface_ship[6] = surface_ship[14]->createNewRotatedSurface(180);
+	surface_ship[7] = surface_ship[15]->createNewRotatedSurface(180);
+	surface_ship[8] = surface_ship[12]->createNewRotatedSurface(90);
+	surface_ship[9] = surface_ship[13]->createNewRotatedSurface(90);
+	surface_ship[10] = surface_ship[14]->createNewRotatedSurface(90);
+	surface_ship[11] = surface_ship[15]->createNewRotatedSurface(90);
+	rot_surface_ship = new Foliage::RotativeSurface();
+	for (int i = 0; i < 15; ++i)
+	{
+		rot_surface_ship->setSurface(Foliage::Direction(i), surface_ship[i]);
+	}
+}
+
+FlyerEnemy::FlyerEnemy()
+{
+	_life = 65;
+	_sprite = new Foliage::RotativeSprite(rot_surface_ship);
+	_sprite->getHitbox()->addRect(Foliage::Rect(13, 11, 21, 26));
+	//_turretPosition = Foliage::Point(24, 24);
+}
+
+FlyerEnemy::~FlyerEnemy()
+{
+	delete _sprite;
+}
+
+///// TANK ENEMY /////
+
+void TankEnemy::loadSurfaces()
+{
+}
+
+TankEnemy::TankEnemy()
+{
+}
+
+TankEnemy::~TankEnemy()
+{
 }

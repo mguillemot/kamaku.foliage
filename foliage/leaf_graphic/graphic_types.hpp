@@ -24,6 +24,11 @@ namespace Foliage
 			: w(sw), h(sh)
 		{
 		}
+
+		Size inverted() const
+		{
+			return Size(h, w);
+		}
 	};
 	
 	struct Point
@@ -116,14 +121,11 @@ namespace Foliage
 			return p;
 		}
 		
-		static bool intersects(const Rect &a, const Rect &b);
+		static bool intersects(const Rect &a, const Rect &b)
+		{
+			return !(b.x > a.x + a.w || b.x + b.w < a.x || b.y > a.y + a.h || b.y + b.h < a.y);
+		}
 	};
-
-	inline bool Rect::intersects(const Foliage::Rect &a, const Foliage::Rect &b)
-	{
-		return !(b.x > a.x + a.w || b.x + b.w < a.x || b.y > a.y + a.h || b.y + b.h < a.y);
-	}
-	
 }
 
 #endif //__FOLIAGE_GRAPHIC_TYPES

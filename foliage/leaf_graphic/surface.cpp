@@ -14,28 +14,8 @@
 	#define fread sysace_fread
 	#define fclose sysace_fclose
 #else
-
-#include <cstdio>
-#include <SDL.h>
-
-void Foliage::Surface::lock() const
-{
-	if (_locks == 0)
-	{
-		SDL_LockSurface(_SDLSurface);
-	}
-	_locks++;
-}
-
-void Foliage::Surface::unlock() const
-{
-	_locks--;
-	if (_locks == 0)
-	{
-		SDL_UnlockSurface(_SDLSurface);
-	}
-}
-
+	#include <cstdio>
+	#include <SDL.h>
 #endif
 
 Foliage::Surface::Surface(const Foliage::Size s, Foliage::Color *pixels, const std::string &name) 
@@ -47,12 +27,21 @@ Foliage::Surface::Surface(const Foliage::Size s, Foliage::Color *pixels, const s
 		_instancized = -1;
 	#else
 		_SDLSurface = SDL_CreateRGBSurfaceFrom(pixels, s.w, s.h, 16, s.w * 2, 0x1f << 11, 0x3f << 5, 0x1f, 0);
-		_locks = 0;
+		if (SDL_MUSTLOCK(_SDLSurface))
+		{
+			std::cout << "ERROR: surface needs locks to be accessible." << std::endl;
+			exit(1);
+		}
+		if (_SDLSurface->format->BytesPerPixel != 2)
+		{
+			std::cout << "ERROR: not a 16 bpp surface." << std::endl;
+			exit(1);
+		}
         SDL_SetColorKey(_SDLSurface, SDL_RLEACCEL | SDL_SRCCOLORKEY, SDL_MapRGB(_SDLSurface->format, 0xFF, 0, 0xFF));	
 	#endif
 }
 
-Foliage::Surface *Foliage::Surface::createSurface(const Foliage::Size s, const std::string &name)
+Foliage::Surface *Foliage::Surface::createEmptySurface(const Foliage::Size s, const std::string &name)
 {
 	Foliage::Color *pixels = new Color[s.w * s.h];
 	return new Foliage::Surface(s, pixels, name);
@@ -76,15 +65,8 @@ Foliage::Color Foliage::Surface::getPixel(const Foliage::Point p) const
 			return _pixels[p.y * _size.w + p.x];
 		#endif
 	#else
-		lock();
-		if (_SDLSurface->format->BytesPerPixel != 2)
-		{
-			std::cout << "FOLIAGE can only work on 16 bpp surfaces." << std::endl;
-			exit(1);
-		}
 		Uint8 *addr = (Uint8 *)_SDLSurface->pixels + p.y * _SDLSurface->pitch + p.x * 2;
 		Foliage::Color *pix = (Foliage::Color *)addr;
-		unlock();
 		return *pix;
 	#endif
 }
@@ -103,19 +85,14 @@ void Foliage::Surface::setPixel(const Foliage::Point p, const Foliage::Color col
 			_pixels[p.y * _size.w + p.x] = color;
 		#endif
 	#else
-		lock();
 		Uint8 *addr = (Uint8 *)_SDLSurface->pixels + p.y * _SDLSurface->pitch + p.x * 2;
 		Foliage::Color *pix = (Foliage::Color *)addr;
 		*pix = color;
-		unlock();
 	#endif
 }
 
 void Foliage::Surface::drawLine(const Foliage::Point from, const Foliage::Point to, const Foliage::Color color)
 {
-	#ifndef __PPC__
-		lock();
-	#endif
 	if (from.x == to.x)
 	{
 		// vertical line
@@ -167,16 +144,10 @@ void Foliage::Surface::drawLine(const Foliage::Point from, const Foliage::Point 
 			}
 		}
 	}
-	#ifndef __PPC__
-		unlock();
-	#endif
 }
 
 void Foliage::Surface::drawRect(const Foliage::Rect &r, const Foliage::Color color)
 {
-	#ifndef __PPC__
-		lock();
-	#endif
 	const Foliage::Point c1 = Foliage::Point(r.x, r.y);
 	const Foliage::Point c2 = Foliage::Point(r.x, r.y + r.h - 1);
 	const Foliage::Point c3 = Foliage::Point(r.x + r.w - 1, r.y);
@@ -185,8 +156,25 @@ void Foliage::Surface::drawRect(const Foliage::Rect &r, const Foliage::Color col
 	drawLine(c1, c3, color);
 	drawLine(c2, c4, color);
 	drawLine(c3, c4, color);
-	#ifndef __PPC__
-		unlock();
+}
+
+void Foliage::Surface::fillRect(const Foliage::Rect &r, const Foliage::Color color)
+{
+	#ifdef __PPC__
+		for (Sint16 j = r.y; j < r.y + r.h; j++)
+		{
+			for (Sint16 i = r.x; i < r.x + r.w; i++)
+			{
+				setPixel(Foliage::Point(i, j), color);
+			}
+		}
+	#else
+		SDL_Rect s;
+		s.x = r.x;
+		s.y = r.y;
+		s.h = r.h;
+		s.w = r.w;
+		SDL_FillRect(_SDLSurface, &s, color);
 	#endif
 }
 
@@ -413,49 +401,65 @@ Foliage::Surface *Foliage::Surface::readBMP(const std::string &filename)
 	return new(Foliage::Eternal) Foliage::Surface(Foliage::Size(width, height), baseaddr, filename);
 }
 
-#ifdef __PPC__
-
 Foliage::Surface *Foliage::Surface::createNewShiftedSurface(const Sint32 shift) const
 {
-	// Allocate surface memory
-	Foliage::Color *baseaddr = new(Foliage::Eternal) Foliage::Color[_size.w * _size.h];
-	if (baseaddr == NULL)
-	{
-		std::cout << "Not enough memory." << std::endl;
-		return NULL;
-	}
-	
-	// Compute the shifted surface
-	#ifdef REARRANGE_SURFACES
-		for (Sint32 j = shift; j < _size.h; j++)
-		{
-			for (Sint32 i = 0; i < _size.w; i++)
-			{
-				Foliage::Color *writeaddr = baseaddr;
-				writeaddr += (i * _size.h + (_size.h - 1 - j));
-				*writeaddr = _pixels[(i * _size.h + (_size.h - 1 - (j - shift)))];
-			}
-		}
-	#else
-		for (Sint32 j = 0; j < _size.h; j++)
-		{
-			for (Sint32 i = shift; i < _size.w; i++)
-			{
-				Foliage::Color *writeaddr = baseaddr;
-				writeaddr += (j * width + i);
-				*writeaddr = _pixels[(j * _size.w + (i - shift))];
-			}
-		}
-	#endif
-	
-	// Flush processor cache
-	Foliage::flushDCache();
-	
-	// Allocates and create the surface
+	// Create surface
 	std::string newname = _name;
 	newname += '+';
 	newname += ('0' + shift);
-	return new(Foliage::Eternal) Foliage::Surface(_size, baseaddr, newname);
+	Foliage::Surface *s = Surface::createEmptySurface(_size, newname);
+
+	// Compute the shifted surface
+	Foliage::Point p;
+	for (p.y = 0; p.y < _size.h; p.y++)
+	{
+		for (p.x = shift; p.x < _size.w; p.x++)
+		{
+			s->setPixel(Foliage::Point(p.x, p.y + shift), getPixel(p));
+		}
+	}
+		
+	// Return resulting surface
+	return s;
 }
 
-#endif
+Foliage::Surface *Foliage::Surface::createNewRotatedSurface(const Sint32 angle) const
+{
+	// Check angle validity
+	if (angle != 90 && angle != 180 && angle != 270)
+	{
+		std::cout << "Cannot rotate the surface " << angle << " degrees." << std::endl;
+		return NULL;
+	}
+
+	// Create surface
+	std::string newname = _name;
+	newname += '/';
+	newname += angle;
+	const Foliage::Size size = (angle == 180) ? _size : _size.inverted();
+	Foliage::Surface *s = Surface::createEmptySurface(size, newname);
+	
+	// Compute the rotated surface
+	Foliage::Point p;
+	for (p.y = 0; p.y < _size.h; p.y++)
+	{
+		for (p.x = 0; p.x < _size.w; p.x++)
+		{
+			if (angle == 90)
+			{
+				s->setPixel(Foliage::Point(_size.h - 1 - p.y, p.x), getPixel(p));
+			}
+			else if (angle == 180)
+			{
+				s->setPixel(Foliage::Point(_size.w - 1 - p.x, _size.h - 1 - p.y), getPixel(p));
+			}
+			else
+			{
+				s->setPixel(Foliage::Point(p.y, _size.w - 1 - p.x), getPixel(p));
+			}
+		}
+	}
+
+	// Return resulting surface
+	return s;
+}

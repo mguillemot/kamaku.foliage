@@ -60,7 +60,6 @@ Foliage::Timer Foliage::Screen::_timer;
 
 inline void SDLsetPixel(SDL_Surface *surface, const int x, const int y, const Foliage::Color pixel)
 {
-	SDL_LockSurface(surface);
 	if (surface->format->BytesPerPixel != 2)
 	{
 		std::cout << "FOLIAGE can only work on 16 bpp surfaces." << std::endl;
@@ -69,7 +68,6 @@ inline void SDLsetPixel(SDL_Surface *surface, const int x, const int y, const Fo
 	Uint8 *p = (Uint8 *)surface->pixels + y * surface->pitch + x * 2;
 	Foliage::Color *pix = (Foliage::Color *)p;
 	*pix = pixel;
-	SDL_UnlockSurface(surface);
 }
 
 #endif
@@ -203,10 +201,15 @@ void Foliage::Screen::init()
 		ivga_fill_screen(_buffer[1], Foliage::Colors::Black);
 		flip();
 	#else
-		_screen = SDL_SetVideoMode(Width, Height, 16, SDL_SWSURFACE | SDL_DOUBLEBUF);
+		_screen = SDL_SetVideoMode(Width, Height, 16, SDL_HWSURFACE | SDL_DOUBLEBUF);
 		if (_screen == NULL)
 		{
-			std::cout << "Couldn't set required video mode." << std::endl;
+			std::cout << "ERROR: Couldn't set required video mode." << std::endl;
+			exit(1);
+		}
+		if (SDL_MUSTLOCK(_screen))
+		{
+			std::cout << "ERROR: Video mode requires locking." << std::endl;
 			exit(1);
 		}
 		SDL_WM_SetCaption("Kamaku", NULL);

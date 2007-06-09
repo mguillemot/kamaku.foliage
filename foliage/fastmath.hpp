@@ -13,6 +13,8 @@ namespace Foliage
 		static Fixed cos(const Fixed x);
 		static Fixed sin(const Fixed x);
 		static Fixed atan(const Fixed x);
+		static Direction direction(const Sint16 dx, const Sint16 dy);
+		static Direction direction(const Fixed dx, const Fixed dy);
 	
 	private:
 		FastMath() {}
