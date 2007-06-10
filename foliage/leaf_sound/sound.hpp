@@ -14,6 +14,7 @@ namespace Foliage
 		~Sound();
 		
 		Sint32 getSamplesNb() const;
+		Sint32 getCurrentSampleNb() const;
 		Uint32 getNextSample();
 		void rewind();
 		bool ended() const;

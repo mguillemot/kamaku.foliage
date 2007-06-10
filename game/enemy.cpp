@@ -250,7 +250,7 @@ void DonutEnemy::update()
 	Enemy::update();
 	updateTurret();
 	_turret->update();
-	if (!isDead() && currentGame->frame % 50 == 0)
+	if (!isDead() && (currentLevel->rythm->events() & EVENT_MAIN))
     {
 		Foliage::Point turret = getPosition() + turret_position[_cran];
 		fireAt(turret, currentLevel->playerShip->getCenter(), Foliage::Fixed(Sint16(2)), F_0, Bullet_Green_0);

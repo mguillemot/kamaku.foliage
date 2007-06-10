@@ -36,6 +36,8 @@ namespace Foliage
 			void   setInstancized(const Sint32 instancized) { _instancized = instancized; }
 			Sint32 getInstancized() const { return _instancized; }
 		#else
+			void lock() const;
+			void unlock() const;
 			SDL_Surface *getSDLSurface() const { return _SDLSurface; }
 		#endif
 
@@ -53,6 +55,7 @@ namespace Foliage
 			Sint32 _instancized;
 		#else
 			SDL_Surface *_SDLSurface;
+			mutable Sint32 _locks;
 		#endif
 	};
 	

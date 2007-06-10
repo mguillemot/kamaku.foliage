@@ -78,7 +78,8 @@ void BulletGenerator::update()
 {
 	Bullet::update();
 	_generateTimer--;
-	if (_generateTimer == 0)
+	//if (_generateTimer == 0)
+	if (currentLevel->rythm->events() & EVENT_SUB)
 	{
 		_dead = true;
 		const Foliage::Point from = _sprite->getCenter();

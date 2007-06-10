@@ -51,8 +51,6 @@ void append_string(string &s, Sint32 n, Sint32 min_len = 1)
 
 void start()
 {
-	Foliage::Sound bg("kloops.wav");
-	cout << "bg music has " << bg.getSamplesNb() << " samples" << endl;
 	Foliage::Sound hit("break.wav");
 	cout << "SFX has " << hit.getSamplesNb() << " samples" << endl;
 	//SoundManager::disableSound();
@@ -99,20 +97,20 @@ void start()
 	Sint32 framesBeforeLaser0 = -1, framesBeforeLaser1 = -1;
 	const Fixed ShotSpeed = Fixed(Sint16(10));
 	const Fixed LaserSpeed = Fixed(Sint16(20));
-	RythmDisplay rythm;
 	Jauge jaugeLaser(100);
+	currentLevel->rythm = new RythmDisplay();
 	Enemy *e = new DonutEnemy();
 	e->setPosition(Point(100, 40));
 	currentLevel->enemies.push_back(e);
 
-	//SoundManager::playBg(&bg);		
+	currentLevel->rythm->startMusic();
 	
 	while (true)
 	{
 		Synchronizator waitEndOfBg = map.asyncDraw();
 
-		rythm.nextFrame();
-
+		currentLevel->rythm->update();
+		
 		while (Foliage::InputManager::numberOfEvents() > 0)
 		{
 			InputEvent e = Foliage::InputManager::nextEvent();
@@ -321,7 +319,7 @@ void start()
 		
 		// BEGIN DRAWING SPRITES NOW!
 		
-		rythm.getUpdatedSurface()->drawAt(Point(20, 200));
+		currentLevel->rythm->surface()->drawAt(Point(10, 150));
 		ship.draw();
 		if (currentGame->show_hitbox)
 		{
@@ -420,6 +418,7 @@ void start()
 		if (skipped > 0)
 		{
 			Screen::setPixel(Point(0, 0), Colors::Green);
+			//std::cout << "skipped " << skipped << std::endl;
 		}
 		else
 		{

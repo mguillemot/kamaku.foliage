@@ -18,6 +18,28 @@
 	#include <SDL.h>
 #endif
 
+#ifndef __PPC__
+
+void Foliage::Surface::lock() const
+{
+	if (_locks == 0)
+	{
+		SDL_LockSurface(_SDLSurface);
+	}
+	_locks++;
+}
+
+void Foliage::Surface::unlock() const
+{
+	_locks--;
+	if (_locks == 0)
+	{
+		SDL_UnlockSurface(_SDLSurface);
+	}
+}
+
+#endif
+
 Foliage::Surface::Surface(const Foliage::Size s, Foliage::Color *pixels, const std::string &name) 
 	: _size(s)
 {
@@ -27,11 +49,7 @@ Foliage::Surface::Surface(const Foliage::Size s, Foliage::Color *pixels, const s
 		_instancized = -1;
 	#else
 		_SDLSurface = SDL_CreateRGBSurfaceFrom(pixels, s.w, s.h, 16, s.w * 2, 0x1f << 11, 0x3f << 5, 0x1f, 0);
-		if (SDL_MUSTLOCK(_SDLSurface))
-		{
-			std::cout << "ERROR: surface needs locks to be accessible." << std::endl;
-			exit(1);
-		}
+		_locks = 0;
 		if (_SDLSurface->format->BytesPerPixel != 2)
 		{
 			std::cout << "ERROR: not a 16 bpp surface." << std::endl;
@@ -65,9 +83,12 @@ Foliage::Color Foliage::Surface::getPixel(const Foliage::Point p) const
 			return _pixels[p.y * _size.w + p.x];
 		#endif
 	#else
+		lock();
 		Uint8 *addr = (Uint8 *)_SDLSurface->pixels + p.y * _SDLSurface->pitch + p.x * 2;
 		Foliage::Color *pix = (Foliage::Color *)addr;
-		return *pix;
+		Foliage::Color c = *pix;
+		unlock();
+		return c;
 	#endif
 }
 
@@ -85,14 +106,19 @@ void Foliage::Surface::setPixel(const Foliage::Point p, const Foliage::Color col
 			_pixels[p.y * _size.w + p.x] = color;
 		#endif
 	#else
+		lock();
 		Uint8 *addr = (Uint8 *)_SDLSurface->pixels + p.y * _SDLSurface->pitch + p.x * 2;
 		Foliage::Color *pix = (Foliage::Color *)addr;
 		*pix = color;
+		unlock();
 	#endif
 }
 
 void Foliage::Surface::drawLine(const Foliage::Point from, const Foliage::Point to, const Foliage::Color color)
 {
+	#ifndef __PPC__
+		lock();
+	#endif
 	if (from.x == to.x)
 	{
 		// vertical line
@@ -144,10 +170,16 @@ void Foliage::Surface::drawLine(const Foliage::Point from, const Foliage::Point 
 			}
 		}
 	}
+	#ifndef __PPC__
+		unlock();
+	#endif
 }
 
 void Foliage::Surface::drawRect(const Foliage::Rect &r, const Foliage::Color color)
 {
+	#ifndef __PPC__
+		lock();
+	#endif
 	const Foliage::Point c1 = Foliage::Point(r.x, r.y);
 	const Foliage::Point c2 = Foliage::Point(r.x, r.y + r.h - 1);
 	const Foliage::Point c3 = Foliage::Point(r.x + r.w - 1, r.y);
@@ -156,6 +188,9 @@ void Foliage::Surface::drawRect(const Foliage::Rect &r, const Foliage::Color col
 	drawLine(c1, c3, color);
 	drawLine(c2, c4, color);
 	drawLine(c3, c4, color);
+	#ifndef __PPC__
+		unlock();
+	#endif
 }
 
 void Foliage::Surface::fillRect(const Foliage::Rect &r, const Foliage::Color color)
@@ -169,12 +204,14 @@ void Foliage::Surface::fillRect(const Foliage::Rect &r, const Foliage::Color col
 			}
 		}
 	#else
+		lock();
 		SDL_Rect s;
 		s.x = r.x;
 		s.y = r.y;
 		s.h = r.h;
 		s.w = r.w;
 		SDL_FillRect(_SDLSurface, &s, color);
+		unlock();
 	#endif
 }
 
@@ -186,7 +223,9 @@ void Foliage::Surface::fill(const Foliage::Color color)
 			_pixels[i] = color;
 		}
 	#else
+		lock();
 		SDL_FillRect(_SDLSurface, NULL, color);
+		unlock();
 	#endif
 }
 

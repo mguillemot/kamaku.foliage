@@ -160,3 +160,8 @@ bool Foliage::Sound::ended() const
 {
 	return (_curSample >= _samplesNb);
 }
+
+Sint32 Foliage::Sound::getCurrentSampleNb() const
+{
+	return _curSample;
+}

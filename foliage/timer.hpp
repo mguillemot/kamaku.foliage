@@ -20,6 +20,7 @@ namespace Foliage
 		void stop();
 		void reset();
 		Uint32 duration() const; // in microseconds
+		//TODO: use milliseond timer (microsecond timer wraps in 70 min, could be insufficient)
 		
 	private:
 		#ifdef __PPC__

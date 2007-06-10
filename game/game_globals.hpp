@@ -7,6 +7,7 @@
 #include "foliage.hpp"
 #include "bullet.hpp"
 #include "laser.hpp"
+#include "rythm_display.hpp"
 
 class Map;
 
@@ -36,6 +37,7 @@ public:
 	Sint32           time;
 	ListEnemy        enemies;
 	Map             *map;
+	RythmDisplay    *rythm;
 
 	void reset()
 	{

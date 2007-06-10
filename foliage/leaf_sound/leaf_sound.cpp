@@ -84,14 +84,14 @@ Uint32 mixbuffer[256];
 
 void Foliage::SoundManager::SDL_Audio_Callback(void *userdata, Uint8 *stream, Sint32 len)
 {
-	if (len != 2048)
+	if (len != (_audioSpec.samples * 4))
 	{
 		std::cout << "Invalid audio callback buffer length: " << len << std::endl;
 		return;
 	}
 	Uint32 sample_sfx, sample_bg, sample_mixed;
 	Uint32 *buf = (Uint32 *)stream;
-	for (Sint32 i = 0; i < 512; i++)
+	for (Sint32 i = 0; i < _audioSpec.samples; i++)
 	{
 		sample_bg = (_bg != NULL) ? _bg->getNextSample() : 0;
 		sample_sfx = (_sfx != NULL) ? _sfx->getNextSample() : 0;
@@ -113,11 +113,10 @@ void Foliage::SoundManager::init()
 	_audioSpec.freq = 48000;
 	_audioSpec.format = AUDIO_S16SYS;
 	_audioSpec.channels = 2;
-	_audioSpec.samples = 512;
+	_audioSpec.samples = 2048;
 	_audioSpec.callback = SDL_Audio_Callback;
 	_audioSpec.userdata = NULL;
 	SDL_OpenAudio(&_audioSpec, NULL);
-	SDL_PauseAudio(0);
 	std::cout << " * sound manager initialized" << std::endl;
 }
 
