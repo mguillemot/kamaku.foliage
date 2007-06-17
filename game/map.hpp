@@ -10,6 +10,11 @@ public:
 	Map(Foliage::Surface *map)
 	{
 		_map = map;
+		#ifdef __PPC
+			_map1 = _map->createNewShiftedSurface(1);
+			_map2 = _map->createNewShiftedSurface(2);
+			_map3 = _map->createNewShiftedSurface(3);
+		#endif
 		_scroll = _map->getSize().h - 320;
 		_currentWidth = _map->getSize().w;
 	}
@@ -44,19 +49,19 @@ public:
 		#ifdef __PPC__
 			if (section.y % 4 == 0)
 			{
-				waitEndOfBg = Screen::asyncBlitSection(background.getCurrentSurface(), section, Point(0, 0));
+				return Foliage::Screen::asyncBlitSection(_map, section, Foliage::Point(0, 0));
 			}
 			else if (section.y % 4 == 1)
 			{
-				waitEndOfBg = Screen::asyncBlitSection(background3.getCurrentSurface(), section, Point(0, 0));
+				return Foliage::Screen::asyncBlitSection(_map3, section, Foliage::Point(0, 0));
 			}
 			else if (section.y % 4 == 2)
 			{
-				waitEndOfBg = Screen::asyncBlitSection(background2.getCurrentSurface(), section, Point(0, 0));
+				return Foliage::Screen::asyncBlitSection(_map2, section, Foliage::Point(0, 0));
 			}
 			else
 			{
-				waitEndOfBg = Screen::asyncBlitSection(background1.getCurrentSurface(), section, Point(0, 0));
+				return Foliage::Screen::asyncBlitSection(_map1, section, Foliage::Point(0, 0));
 			}
 		#else
 			return Foliage::Screen::asyncBlitSection(_map, section, Foliage::Point(0, 0));
@@ -79,6 +84,11 @@ public:
 
 protected:
 	Foliage::Surface *_map;
+	#ifdef __PPC__
+		Foliage::Surface *_map1;
+		Foliage::Surface *_map2;
+		Foliage::Surface *_map3;
+	#endif
 	Sint16            _scroll;
 	Sint16            _currentWidth;
 	Sint16            _currentShift;

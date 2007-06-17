@@ -42,7 +42,7 @@ void* operator new(std::size_t sz, const Foliage::MemoryPersistance pool) throw 
 	#ifdef __PPC__
 		switch (pool)
 		{
-			case Foliage::Level:
+			case Foliage::LevelOnly:
 				return (void *)levelAlloc.allocate(sz);
 			default:
 				return (void *)eternalAlloc.allocate(sz);
@@ -64,7 +64,7 @@ void* operator new[](std::size_t sz, const Foliage::MemoryPersistance pool) thro
 	#ifdef __PPC__
 		switch (pool)
 		{
-			case Foliage::Level:
+			case Foliage::LevelOnly:
 				return (void *)levelAlloc.allocate(sz);
 			default:
 				return (void *)eternalAlloc.allocate(sz);

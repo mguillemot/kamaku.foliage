@@ -24,11 +24,11 @@ namespace Foliage
 		{
 			for (std::vector<Rect>::const_iterator i = myHitbox->_rects.begin(); i != myHitbox->_rects.end(); ++i)
 			{
-				Foliage::Rect r = *i;
+				Rect r = *i;
 				r.shift(myPos);
 				for (std::vector<Rect>::const_iterator j = hisHitbox->_rects.begin(); j != hisHitbox->_rects.end(); ++j)
 				{
-					Foliage::Rect s = *j;
+					Rect s = *j;
 					s.shift(hisPos);
 					if (Rect::intersects(r, s))
 					{
@@ -42,6 +42,11 @@ namespace Foliage
 		void addRect(const Rect &hitbox)
 		{
 			_rects.push_back(hitbox);
+		}
+
+		const std::vector<Rect> &rects() const
+		{
+			return _rects;
 		}
 
 	protected:

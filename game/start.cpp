@@ -11,6 +11,7 @@
 #include "laser.hpp"
 #include "map.hpp"
 #include "jauge.hpp"
+#include "sm.hpp"
 
 #ifdef main
 #undef main
@@ -71,12 +72,6 @@ void start()
     cout << "Font loaded." << endl;
 	Map map(BitmapLoader::loadBitmap("bg.bmp"));
 
-	//Foliage::SimpleSprite background(); // 300x3910
-	#ifdef __PPC
-		Foliage::Sprite background1(background.getCurrentSurface()->createNewShiftedSurface(1));
-		Foliage::Sprite background2(background.getCurrentSurface()->createNewShiftedSurface(2));
-		Foliage::Sprite background3(background.getCurrentSurface()->createNewShiftedSurface(3));
-	#endif
 	Foliage::AnimatedSprite ship(6);
 	currentLevel->playerShip = &ship;
 	ship.addFrame(BitmapLoader::loadBitmap("vaiss00.bmp"));
@@ -103,12 +98,15 @@ void start()
 	e->setPosition(Point(100, 40));
 	currentLevel->enemies.push_back(e);
 
+	cout << "Start music." << endl;
 	currentLevel->rythm->startMusic();
 	
+	cout << "Start game!" << endl;
 	while (true)
 	{
 		Synchronizator waitEndOfBg = map.asyncDraw();
 
+		map.update();
 		currentLevel->rythm->update();
 		
 		while (Foliage::InputManager::numberOfEvents() > 0)
@@ -140,6 +138,15 @@ void start()
 						fireShot0 = true;
 						fireLaser0 = false;
 						framesBeforeLaser0 = 20;
+
+						const Foliage::Fixed closerEvent = currentLevel->rythm->toCloserEvent();
+						Sint16 ce = Sint16(closerEvent);
+						if (ce < 0)
+						{
+							ce = -ce;
+						}
+						jaugeLaser.setValue(ce);
+						cout << "closer event: " << closerEvent << endl;
 					}
 					else
 					{
@@ -399,10 +406,10 @@ void start()
 		l.draw();
 		Screen::drawLine(lg, pc, Colors::Yellow);
 		jaugeLaser.getUpdatedSurface()->drawAt(Point(10, 290));
-		font.drawString(frame_nb, Point(0, 0));
-		font.drawString(bullets_nb, Point(0, 17));
-		font.drawString(frameskip_nb, Point(0, 34));
-		font.drawString(randlevel_nb, Point(0, 51));
+		font.drawString(frame_nb, Point(1, 1));
+		font.drawString(bullets_nb, Point(1, 10));
+		font.drawString(frameskip_nb, Point(1, 19));
+		font.drawString(randlevel_nb, Point(1, 28));
 		/*
 		if ((frame % 1000) == 0)
 		{
@@ -425,8 +432,6 @@ void start()
 			Screen::setPixel(Point(0, 0), Colors::Black);
 		}
 		Screen::flip();
-		map.update();
-		jaugeLaser.setValue(jaugeLaser.getValue() + 1);
 		currentGame->frame++;
 	}
 }

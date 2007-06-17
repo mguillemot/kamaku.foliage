@@ -10,7 +10,7 @@
 #define SCREEN_VERTICAL 
 
 // undef for normal 15 kHz mode
-#define SCREEN_VGA
+//#define SCREEN_VGA
 
 // whether to store surfaces data in colomns rather then in rows
 #ifdef __PPC__

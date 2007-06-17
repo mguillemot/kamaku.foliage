@@ -10,8 +10,9 @@ class Jauge
 {
 public:
 	Jauge(const Sint32 max)
-		: _max(max), _value(0)
 	{
+		_max = max;
+		_value = 0;
 		_representation = Foliage::Surface::createEmptySurface(Foliage::Size(JAUGE_WIDTH, JAUGE_HEIGHT), "jauge");
 	}
 

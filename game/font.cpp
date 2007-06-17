@@ -85,7 +85,8 @@ Font::Font()
 	//Foliage::Instancizator::instancize(_characters['.']);
 	_characters[':'] = Foliage::BitmapLoader::loadBitmap("s_col.bmp");
 	Foliage::Instancizator::instancize(_characters[':']);
-	/*_characters[';'] = Foliage::BitmapLoader::loadBitmap("s_sco.bmp");
+	/*
+	_characters[';'] = Foliage::BitmapLoader::loadBitmap("s_sco.bmp");
 	Foliage::Instancizator::instancize(_characters[';']);
 	_characters['!'] = Foliage::BitmapLoader::loadBitmap("s_exc.bmp");
 	Foliage::Instancizator::instancize(_characters['!']);
@@ -113,8 +114,9 @@ Font::Font()
 	Foliage::Instancizator::instancize(_characters['*']);
 	_characters['#'] = Foliage::BitmapLoader::loadBitmap("s_die.bmp");
 	Foliage::Instancizator::instancize(_characters['#']);
+	*/
 	_characters[' '] = Foliage::BitmapLoader::loadBitmap("s_spa.bmp");
-	Foliage::Instancizator::instancize(_characters[' ']);*/
+	Foliage::Instancizator::instancize(_characters[' ']);
 	_characters['0'] = Foliage::BitmapLoader::loadBitmap("0.bmp");
 	Foliage::Instancizator::instancize(_characters['0']);
 	_characters['1'] = Foliage::BitmapLoader::loadBitmap("1.bmp");

@@ -49,22 +49,27 @@ namespace Foliage
 			if (_constrained)
 			{
 				const Point pos = getPosition();
-				if (pos.x < 0)
+				for (std::vector<Rect>::const_iterator i = _hitbox.rects().begin(); i != _hitbox.rects().end(); ++i)
 				{
-					_x = F_0;
-				}
-				else if ((pos.x + _size.w) >= Screen::Width)
-				{
-					_x = Fixed(Sint16(Screen::Width - _size.w));
-				}
-				if (pos.y < 0)
-				{
-					_y = F_0;
-				}
-				else if ((pos.y + _size.h) >= Screen::Height)
-				{
-					_y = Fixed(Sint16(Screen::Height - _size.h));
-				}
+					Rect r = *i;
+					r.shift(pos);
+					if (r.x < 0)
+					{
+						_x = Fixed(Sint16(- i->x));
+					}
+					else if ((r.x + r.w) >= Screen::Width)
+					{
+						_x = Fixed(Sint16(Screen::Width - i->x - r.w));
+					}
+					if (r.y < 0)
+					{
+						_y = Fixed(Sint16(- i->y));
+					}
+					else if ((r.y + r.h) >= Screen::Height)
+					{
+						_y = Fixed(Sint16(Screen::Height - i->y - r.h));
+					}
+				}				
 			}
 		}
 

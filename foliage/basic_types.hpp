@@ -180,7 +180,7 @@ namespace Foliage
 			return (s << float(fix));
 		}
 	
-	//TEMP private:
+	private:
 		Sint32 v;
 	};
 }

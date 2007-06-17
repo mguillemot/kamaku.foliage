@@ -118,6 +118,9 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				Optimization="3"
+				InlineFunctionExpansion="2"
+				EnableIntrinsicFunctions="true"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
@@ -225,6 +228,14 @@
 			</File>
 			<File
 				RelativePath="..\game\rythm_display.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\game\sm.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\game\sm.hpp"
 				>
 			</File>
 			<File

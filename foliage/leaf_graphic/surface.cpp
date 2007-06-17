@@ -390,7 +390,7 @@ Foliage::Surface *Foliage::Surface::readBMP(const std::string &filename)
 	for (Sint32 j = infoheader.height - 1; j >= 0; j--)
 	{
 		size_t r = fread(readBuffer, 1, linewidth, infile);
-		if (r != linewidth)
+		if (r != size_t(linewidth))
 		{
 			std::cout << "Corrupt file: " << filename << std::endl;
 			exit(1);
