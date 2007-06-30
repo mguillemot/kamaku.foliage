@@ -1,6 +1,7 @@
 #include <iostream>
 #include "screen.hpp"
 #include "colors.hpp"
+#include "surface.hpp"
 
 #ifdef __PPC__
 
@@ -127,7 +128,7 @@ void Foliage::Screen::blitSectionSynchronizator()
 	#endif
 }
 
-Foliage::Synchronizator Foliage::Screen::asyncBlitSection(const Foliage::Surface *surf,	const Foliage::Rect section, const Foliage::Point pos)
+Foliage::Synchronizator Foliage::Screen::asyncBlitSection(const Foliage::Surface* surf,	const Foliage::Rect section, const Foliage::Point pos)
 {
 	#ifdef __PPC__
 		_superdma_complete = false;
@@ -147,7 +148,7 @@ Foliage::Synchronizator Foliage::Screen::asyncBlitSection(const Foliage::Surface
 		srect.y = section.y;
 		srect.w = section.w;
 		srect.h = section.h;
-		SDL_BlitSurface(surf->getSDLSurface(), &srect, _screen, NULL);
+		SDL_BlitSurface(surf->getSdlSurface(), &srect, _screen, NULL);
 	#endif
 	return &Foliage::Screen::blitSectionSynchronizator;
 }
@@ -321,7 +322,7 @@ void Foliage::Screen::blitSurface(const Foliage::Surface *surf, const Foliage::P
 		SDL_Rect dest;
 		dest.x = pos.x;
 		dest.y = pos.y;
-		SDL_BlitSurface(surf->getSDLSurface(), NULL, _screen, &dest);
+		SDL_BlitSurface(surf->getSdlSurface(), NULL, _screen, &dest);
 	#endif
 }
 

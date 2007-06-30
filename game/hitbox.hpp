@@ -1,57 +1,53 @@
-#ifndef __FOLIAGE_HITBOX
-#define __FOLIAGE_HITBOX
+#ifndef __HITBOX
+#define __HITBOX
 
 #include <vector>
-#include "../basic_types.hpp"
-#include "graphic_types.hpp"
+#include "foliage.hpp"
 
-namespace Foliage
+class Hitbox
 {
-	class Hitbox
+public:
+	void drawCollidableZoneAt(const Foliage::Color color, const Foliage::Point p) const
 	{
-	public:
-		void drawCollidableZoneAt(const Color color, const Point p) const
+		for (std::vector<Foliage::Rect>::const_iterator i = _rects.begin(); i != _rects.end(); ++i)
 		{
-			for (std::vector<Rect>::const_iterator i = _rects.begin(); i != _rects.end(); ++i)
-			{
-				Rect r = *i;
-				r.shift(p);
-				Screen::fillRect(r, color);
-			}
+			Foliage::Rect r = *i;
+			r.shift(p);
+			Foliage::Screen::fillRect(r, color);
 		}
+	}
 
-		static bool collisionTest(const Point myPos, const Hitbox *myHitbox, const Point hisPos, const Hitbox *hisHitbox)
+	static bool collisionTest(const Foliage::Point myPos, const Hitbox *myHitbox, const Foliage::Point hisPos, const Hitbox *hisHitbox)
+	{
+		for (std::vector<Foliage::Rect>::const_iterator i = myHitbox->_rects.begin(); i != myHitbox->_rects.end(); ++i)
 		{
-			for (std::vector<Rect>::const_iterator i = myHitbox->_rects.begin(); i != myHitbox->_rects.end(); ++i)
+			Foliage::Rect r = *i;
+			r.shift(myPos);
+			for (std::vector<Foliage::Rect>::const_iterator j = hisHitbox->_rects.begin(); j != hisHitbox->_rects.end(); ++j)
 			{
-				Rect r = *i;
-				r.shift(myPos);
-				for (std::vector<Rect>::const_iterator j = hisHitbox->_rects.begin(); j != hisHitbox->_rects.end(); ++j)
+				Foliage::Rect s = *j;
+				s.shift(hisPos);
+				if (Foliage::Rect::intersects(r, s))
 				{
-					Rect s = *j;
-					s.shift(hisPos);
-					if (Rect::intersects(r, s))
-					{
-						return true;
-					}
+					return true;
 				}
 			}
-			return false;
 		}
+		return false;
+	}
 
-		void addRect(const Rect &hitbox)
-		{
-			_rects.push_back(hitbox);
-		}
+	void addRect(const Foliage::Rect &hitbox)
+	{
+		_rects.push_back(hitbox);
+	}
 
-		const std::vector<Rect> &rects() const
-		{
-			return _rects;
-		}
+	const std::vector<Foliage::Rect>& rects() const
+	{
+		return _rects;
+	}
 
-	protected:
-		std::vector<Rect> _rects;
-	};
-}
+protected:
+	std::vector<Foliage::Rect> _rects;
+};
 
-#endif //__FOLIAGE_HITBOX
+#endif //__HITBOX

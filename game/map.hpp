@@ -3,13 +3,14 @@
 
 #include "foliage.hpp"
 #include "game_globals.hpp"
-
+#include <iostream>
 class Map
 {
 public:
 	Map(Foliage::Surface *map)
 	{
 		_map = map;
+		std::cout << "map size = " << map->getSize() << std::endl;
 		_scrollSpeed = 1;
 		#ifdef __PPC
 			_map1 = _map->createNewShiftedSurface(1);

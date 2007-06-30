@@ -195,6 +195,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\game\entity.hpp"
+				>
+			</File>
+			<File
 				RelativePath="..\game\font.cpp"
 				>
 			</File>
@@ -208,6 +212,10 @@
 			</File>
 			<File
 				RelativePath="..\game\game_globals.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\game\hitbox.hpp"
 				>
 			</File>
 			<File
@@ -306,6 +314,10 @@
 				Name="leaf_io"
 				>
 				<File
+					RelativePath="..\foliage\leaf_io\file.hpp"
+					>
+				</File>
+				<File
 					RelativePath="..\foliage\leaf_io\keyboard_fr.hpp"
 					>
 				</File>
@@ -326,11 +338,11 @@
 					>
 				</File>
 				<File
-					RelativePath="..\foliage\leaf_graphic\bitmap_loader.cpp"
+					RelativePath="..\foliage\leaf_graphic\bmp_loader.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\foliage\leaf_graphic\bitmap_loader.hpp"
+					RelativePath="..\foliage\leaf_graphic\bmp_loader.hpp"
 					>
 				</File>
 				<File
@@ -339,10 +351,6 @@
 				</File>
 				<File
 					RelativePath="..\foliage\leaf_graphic\graphic_types.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\foliage\leaf_graphic\hitbox.hpp"
 					>
 				</File>
 				<File
@@ -371,10 +379,6 @@
 				</File>
 				<File
 					RelativePath="..\foliage\leaf_graphic\sprite.hpp"
-					>
-				</File>
-				<File
-					RelativePath="..\foliage\leaf_graphic\surface.cpp"
 					>
 				</File>
 				<File

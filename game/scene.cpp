@@ -4,6 +4,7 @@
 #include "game_globals.hpp"
 #include "enemy.hpp"
 #include "sm.hpp"
+#include "entity.hpp"
 
 using namespace std;
 using namespace Foliage;
@@ -33,17 +34,17 @@ void LevelScene::load()
 	cout << "Hit SFX has " << hit->getSamplesNb() << " samples" << endl;
 
 	font = new Font();
-	map = new Map(BitmapLoader::loadBitmap("bg.bmp"));
+	map = new Map(BmpLoader::loadBmp("bg.bmp"));
 	map->setScrollSpeed(2);
 
-	ship = new AnimatedSprite(6);
+	ship = new AnimatedEntity(6);
 	currentLevel->playerShip = ship;
-	ship->addFrame(BitmapLoader::loadBitmap("vaiss00.bmp"));
-	ship->addFrame(BitmapLoader::loadBitmap("vaiss01.bmp"));
-	ship->addFrame(BitmapLoader::loadBitmap("vaiss02.bmp"));
-	ship->addFrame(BitmapLoader::loadBitmap("vaiss03.bmp"));
-	ship->addFrame(BitmapLoader::loadBitmap("vaiss04.bmp"));
-	ship->addFrame(BitmapLoader::loadBitmap("vaiss05.bmp"));
+	ship->addFrame(BmpLoader::loadBmp("vaiss00.bmp"));
+	ship->addFrame(BmpLoader::loadBmp("vaiss01.bmp"));
+	ship->addFrame(BmpLoader::loadBmp("vaiss02.bmp"));
+	ship->addFrame(BmpLoader::loadBmp("vaiss03.bmp"));
+	ship->addFrame(BmpLoader::loadBmp("vaiss04.bmp"));
+	ship->addFrame(BmpLoader::loadBmp("vaiss05.bmp"));
 	Rect shipHitbox = Rect(10, 11, 8, 9);
 	ship->getHitbox()->addRect(shipHitbox);
 	ship->setPosition(Point(100, 250));
@@ -278,12 +279,12 @@ void LevelScene::postRender()
 		}
 		else
 		{
-			b->getSprite()->draw();
+			b->getEntity()->draw();
 			if (currentGame->show_hitbox)
 			{
-				b->getSprite()->drawHitbox(Colors::Black);
+				b->getEntity()->drawHitbox(Colors::Black);
 			}
-			if (Sprite::collisionTest(ship, b->getSprite()))
+			if (Entity::collisionTest(ship, b->getEntity()))
 			{
 				delete b;
 				i = currentLevel->enemyBullets.erase(i);
@@ -300,7 +301,7 @@ void LevelScene::postRender()
 	{
 		Bullet *b = *j;
 		b->update();
-		if (b->getSprite()->outOfScreen())
+		if (b->getEntity()->outOfScreen())
 		{
 			j = currentLevel->myBullets.erase(j);
 			delete b;
@@ -308,7 +309,7 @@ void LevelScene::postRender()
 		else
 		{
 			bool deleted = false;
-			b->getSprite()->draw();
+			b->getEntity()->draw();
 			for (ListEnemy::iterator enn = currentLevel->enemies.begin(); enn != currentLevel->enemies.end(); ++enn)
 			{
 				Enemy *enemy = *enn;

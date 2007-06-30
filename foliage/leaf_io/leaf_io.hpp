@@ -3,6 +3,7 @@
 
 #include <queue>
 #include "../basic_types.hpp"
+#include "file.hpp"
 
 namespace Foliage
 {

@@ -4,6 +4,7 @@
 #include <list>
 #include <vector>
 #include "foliage.hpp"
+#include "entity.hpp"
 
 enum BulletType
 { 
@@ -23,25 +24,25 @@ public:
     virtual ~Bullet();
 
 	// Instance methods
-	Foliage::Sprite *getSprite() { return _sprite; }
-	const Foliage::Sprite *getSprite() const { return _sprite; }
+	Entity*          getEntity() { return _entity; }
+	const Entity*    getEntity() const { return _entity; }
     void             setSpeed(const Foliage::Fixed speed);
 	Foliage::Fixed   getSpeed() const { return _speed; }
 	void             setDirection(const Foliage::Fixed direction);
 	Foliage::Fixed   getDirection() const { return _direction; }
 	Sint32           getType() const { return _type; }
     virtual void     update();
-	bool             isDead() const { return (_dead || _sprite->outOfScreen()); }
+	bool             isDead() const { return (_dead || _entity->outOfScreen()); }
 
 	// Static methods
 	static void      loadBulletSurfaces();
 
 protected:
-    void             updateSpriteSpeed();
+    void             updateEntitySpeed();
 
     Foliage::Fixed   _direction;
     Foliage::Fixed   _speed;
-    Foliage::Sprite *_sprite;
+    Entity*          _entity;
 	Sint32           _type;
 	bool             _dead;
     

@@ -14,15 +14,6 @@
 	}
 #endif
 
-void Foliage::flushDCache()
-{
-	#ifdef __PPC__
-		XCache_DisableDCache();
-		XCache_EnableDCache(0xC0000000);
-		XCache_EnableWriteThrough(0xC0000000);
-	#endif
-}
-
 void Foliage::init()
 {
 	std::cout << std::endl << "Loading FOLIAGE system ";
@@ -34,6 +25,8 @@ void Foliage::init()
 
 	#ifdef __PPC__
 		XCache_EnableICache(0xC0000000);
+		XCache_EnableDCache(0xC0000000);
+		XCache_EnableWriteThrough(0xC0000000);
 		flushDCache();
 		std::cout << "FOLIAGE: processor caches enabled." << std::endl;
 		

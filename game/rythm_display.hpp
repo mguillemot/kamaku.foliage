@@ -9,21 +9,6 @@
 #define RYTHMDISPLAY_WIDTH  80
 #define RYTHMDISPLAY_HEIGHT 100
 
-/*
-enum Events
-{
-	EVENT_NONE = 0,
-	EVENT_1 = 1,
-	EVENT_2 = 2,
-	EVENT_3 = 4,
-	EVENT_4 = 8,
-	EVENT_5 = 16,
-	EVENT_6 = 32,
-	EVENT_7 = 64,
-	EVENT_8 = 128
-};
-*/
-
 struct Beat
 {
 	Foliage::Fixed time;
@@ -50,7 +35,7 @@ public:
 			_hold[k] = F_0;
 		}
 		std::cout << _sm->level[0].measure_nb << " measures." << std::endl;
-		_representation = Foliage::Surface::createEmptySurface(Foliage::Size(RYTHMDISPLAY_WIDTH, RYTHMDISPLAY_HEIGHT), "rythm");
+		_representation = new Foliage::Surface(Foliage::Size(RYTHMDISPLAY_WIDTH, RYTHMDISPLAY_HEIGHT), "rythm");
 		const Foliage::Fixed bpm = Foliage::Fixed(333.3333333f);
 		const Foliage::Fixed gap = Foliage::Fixed(-21.0f);
 		one_frame = Foliage::Fixed(16.77777777f);

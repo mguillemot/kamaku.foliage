@@ -13,7 +13,7 @@ public:
 	{
 		_max = max;
 		_value = 0;
-		_representation = Foliage::Surface::createEmptySurface(Foliage::Size(JAUGE_WIDTH, JAUGE_HEIGHT), "jauge");
+		_representation = new Foliage::Surface(Foliage::Size(JAUGE_WIDTH, JAUGE_HEIGHT), "jauge");
 	}
 
 	void setValue(const Sint32 value)

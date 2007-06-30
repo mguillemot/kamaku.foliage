@@ -29,7 +29,7 @@ namespace Foliage
 			return _surface;
 		}
 
-		void setSurface(const Surface* surface)
+		void setSurface(Surface* surface)
 		{
 			_surface = surface;
 		}

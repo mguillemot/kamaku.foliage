@@ -29,15 +29,15 @@ struct Game
 struct Level
 {
 public:
-	Game            *game;
+	Game*            game;
 	ListBullet       enemyBullets;
 	ListBullet       myBullets;
 	ListLaser        enemyLasers;
-	Foliage::Sprite *playerShip;
+	Entity*          playerShip;
 	Sint32           time;
 	ListEnemy        enemies;
-	Map             *map;
-	RythmDisplay    *rythm;
+	Map*             map;
+	RythmDisplay*    rythm;
 
 	void reset()
 	{
@@ -58,7 +58,7 @@ public:
 	}
 };
 
-extern Game *currentGame;
-extern Level *currentLevel;
+extern Game* currentGame;
+extern Level* currentLevel;
 
 #endif //__GAME_GLOBALS

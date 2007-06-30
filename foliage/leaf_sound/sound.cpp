@@ -1,5 +1,6 @@
 #include <iostream>
 #include "sound.hpp"
+#include "../leaf_io/file.hpp"
 
 #ifdef __PPC__
 	#include <sysace_stdio.h>
@@ -10,27 +11,6 @@
 #else
 	#include <cstdio>
 #endif
-
-inline Uint16 ReadUShort(FILE *fptr)
-{
-	Uint8 readBuffer[2];
-	fread(readBuffer, 1, 2, fptr);
-	return ((readBuffer[1] << 8) | readBuffer[0]);
-}
-
-inline Uint32 ReadUIntLil(FILE *fptr)
-{
-	Uint8 readBuffer[4];
-	fread(readBuffer, 1, 4, fptr);
-	return ((((((readBuffer[3] << 8) | readBuffer[2]) << 8) | readBuffer[1]) << 8) | readBuffer[0]);
-}
-
-inline Uint32 ReadUIntBig(FILE *fptr)
-{
-	Uint8 readBuffer[4];
-	fread(readBuffer, 1, 4, fptr);
-	return ((((((readBuffer[0] << 8) | readBuffer[1]) << 8) | readBuffer[2]) << 8) | readBuffer[3]);
-}
 
 struct RIFFCHUNK
 {
@@ -65,66 +45,55 @@ Foliage::Sound::Sound(const std::string filename)
 	RIFFCHUNK riffchunk;
 	FMTCHUNK fmtchunk;
 	DATACHUNK datachunk;
-	FILE *infile;
-	#ifdef __PPC__
-		infile = fopen(filename.c_str(), "r");
-	#else
-		std::string filename2 = "../game/resources/" + filename;
-		infile = fopen(filename2.c_str(), "rb");
-	#endif
-	if (infile == NULL)
+	
+	Foliage::File infile(filename);
+
+	// Read the RIFF chunk
+	riffchunk.chunkID = infile.readUint32BE();
+	riffchunk.chunkSize = infile.readUint32LE();
+	riffchunk.format = infile.readUint32BE();
+	
+	// Read the FMT chunk 
+	fmtchunk.subchunkID = infile.readUint32BE();
+	fmtchunk.subchunkSize = infile.readUint32LE();
+	fmtchunk.audioFormat = infile.readUint16();
+	fmtchunk.numChannels = infile.readUint16();
+	fmtchunk.sampleRate = infile.readUint32LE();
+	fmtchunk.byteRate = infile.readUint32LE();
+	fmtchunk.blockAlign = infile.readUint16();
+	fmtchunk.bitsPerSample = infile.readUint16();
+	
+	// Read the DATA chunk 
+	datachunk.subchunkID = infile.readUint32BE();
+	datachunk.subchunkSize = infile.readUint32LE();
+	
+	_samplesNb = datachunk.subchunkSize >> 2;
+	if (_samplesNb % 256 != 0)
 	{
-		std::cout << "Couldn't open file " << filename << std::endl;
+		_samplesNb = ((_samplesNb >> 8) + 1) << 8; 
+	}
+	_samples = new Uint32[_samplesNb];
+	if (_samples == NULL)
+	{
+		std::cout << "Not enough memory to load sound." << std::endl;
+		exit(1);
 	}
 	else
-	{
-		// Read the RIFF chunk
-		riffchunk.chunkID = ReadUIntBig(infile);
-		riffchunk.chunkSize = ReadUIntLil(infile);
-		riffchunk.format = ReadUIntBig(infile);
-		
-		// Read the FMT chunk 
-		fmtchunk.subchunkID = ReadUIntBig(infile);
-		fmtchunk.subchunkSize = ReadUIntLil(infile);
-		fmtchunk.audioFormat = ReadUShort(infile);
-		fmtchunk.numChannels = ReadUShort(infile);
-		fmtchunk.sampleRate = ReadUIntLil(infile);
-		fmtchunk.byteRate = ReadUIntLil(infile);
-		fmtchunk.blockAlign = ReadUShort(infile);
-		fmtchunk.bitsPerSample = ReadUShort(infile);
-		
-		// Read the DATA chunk 
-		datachunk.subchunkID = ReadUIntBig(infile);
-		datachunk.subchunkSize = ReadUIntLil(infile);
-		
-		_samplesNb = datachunk.subchunkSize >> 2;
-		if (_samplesNb % 256 != 0)
+	{		
+		Sint32 curSample = 0;
+		Uint32 totalRead = 0;
+		while (totalRead < datachunk.subchunkSize)
 		{
-			_samplesNb = ((_samplesNb >> 8) + 1) << 8; 
+			Uint32 numRead = infile.read(readBuffer, 2048);
+			totalRead += numRead;
+			for (Uint32 i = 0; i < numRead; i += 4)
+			{
+				_samples[curSample++] = ((((((readBuffer[i+3] << 8) | readBuffer[i+2]) << 8) | readBuffer[i+1]) << 8) | readBuffer[i]);
+			}
 		}
-		_samples = new Uint32[_samplesNb];
-		if (_samples == NULL)
+		while (curSample < _samplesNb)
 		{
-			std::cout << "Not enough memory to load sound." << std::endl;
-		}
-		else
-		{		
-			Sint32 curSample = 0;
-			Uint32 totalRead = 0;
-			while (totalRead < datachunk.subchunkSize)
-			{
-				Sint32 numRead = Sint32(fread(readBuffer, 1, 2048, infile));
-				totalRead += numRead;
-				for (Sint32 i = 0; i < numRead; i += 4)
-				{
-					_samples[curSample++] = ((((((readBuffer[i+3] << 8) | readBuffer[i+2]) << 8) | readBuffer[i+1]) << 8) | readBuffer[i]);
-				}
-			}
-			fclose(infile);
-			while (curSample < _samplesNb)
-			{
-				_samples[curSample++] = 0;
-			}
+			_samples[curSample++] = 0;
 		}
 	}
 }

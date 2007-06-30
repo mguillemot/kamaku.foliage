@@ -137,6 +137,12 @@ namespace Foliage
 			s << "((" << r.x << ", " << r.y << ") => (" << (r.x + r.w) << ", " << (r.y + r.h) << "))";
 			return s;
 		}
+
+		friend std::ostream & operator<<(std::ostream &s, const Size &size)
+		{
+			s << "(" << size.w << "x" << size.h << ")";
+			return s;
+		}
 	};
 }
 

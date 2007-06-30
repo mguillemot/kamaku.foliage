@@ -14,7 +14,6 @@ namespace Foliage
 
 	void init();
 	void shutDown();
-	void flushDCache();
 }
 
 #endif //_FOLIAGE__FOLIAGE

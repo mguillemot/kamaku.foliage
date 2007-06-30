@@ -13,12 +13,12 @@ namespace Foliage
 		static const Color Red = 0xF800;
 		static const Color Green = 0x07E0;
 		static const Color Blue = 0x001F;
-		static const Color Pink = 0xF81F;
+		static const Color Pink = 0xF81E;
 		static const Color LightBlue = 0x07FF;
 		static const Color Yellow = 0xFFE0;
 		static const Color White = 0xFFFF;
 
-		static const Color Transparent = Pink;
+		static const Color Transparent = 0xF81F;
 		
 	private:
 		Colors() {}

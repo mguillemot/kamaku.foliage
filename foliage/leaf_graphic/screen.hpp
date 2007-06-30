@@ -4,13 +4,14 @@
 #include "../settings.hpp"
 #include "../basic_types.hpp"
 #include "graphic_types.hpp"
-#include "surface.hpp"
 #include "timer.hpp"
 
 namespace Foliage
 {
 
 	typedef void (*Synchronizator)(void);
+
+	class Surface;
 	
 	class Screen
 	{

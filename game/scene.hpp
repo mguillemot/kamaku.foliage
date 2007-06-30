@@ -39,7 +39,7 @@ private:
 	Sint32                   skipped;
 	Font*                    font;
 	Map*                     map;
-	Foliage::AnimatedSprite* ship;
+	AnimatedEntity*          ship;
 	Sint32                   hitCount;
 	bool                     fireShot0, fireShot1, fireLaser0, fireLaser1;
 	Sint32                   framesBeforeLaser0, framesBeforeLaser1;

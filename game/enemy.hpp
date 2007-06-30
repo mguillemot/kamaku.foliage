@@ -2,6 +2,7 @@
 #define __ENEMY
 
 #include <list>
+#include "entity.hpp"
 #include "bullet.hpp"
 #include "foliage.hpp"
 #include "trajectory.hpp"
@@ -20,16 +21,16 @@ public:
 	bool           hasDisappeared() const;
 	bool           collisionTest(Bullet *b);
 	void           drawHitbox(const Foliage::Color color) const;
-	Foliage::Size  getSize() const { return _sprite->getSize(); }
+	Foliage::Size  getSize() const { return _entity->getSize(); }
 	virtual void   setPosition(const Foliage::Point p);
-	Foliage::Point getPosition() const { return _sprite->getPosition(); }
+	Foliage::Point getPosition() const { return _entity->getPosition(); }
 	virtual void   setSpeed(const Foliage::Speed s);
-	Foliage::Sprite *getSprite() { return _sprite; }
+	Entity*        getEntity() { return _entity; }
 
 protected:
-	Foliage::Sprite *_sprite;
-    Sint32           _killedDuration;
-    Sint32           _life;
+	Entity* _entity;
+    Sint32  _killedDuration;
+    Sint32  _life;
 };
 
 typedef std::list<Enemy *> ListEnemy;
@@ -54,8 +55,8 @@ protected:
 
 	void             updateTurret();
 
-	Foliage::RotativeSprite *_turret;
-	Sint16                   _cran;
+	RotativeEntity* _turret;
+	Sint16          _cran;
 };
 
 class FlyerEnemy : public Enemy
@@ -69,7 +70,7 @@ public:
 	virtual void update();
 
 protected:
-	static Foliage::RotativeSurface *rot_surface_ship;
+	static Foliage::RotativeSurface* rot_surface_ship;
 
 	Trajectory _trajectory;
 };
