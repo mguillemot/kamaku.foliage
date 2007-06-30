@@ -4,7 +4,7 @@
 #include <list>
 #include "bullet.hpp"
 #include "foliage.hpp"
-#include "gamecolor.hpp"
+#include "trajectory.hpp"
 
 class Enemy
 {
@@ -33,18 +33,6 @@ protected:
 };
 
 typedef std::list<Enemy *> ListEnemy;
-
-class ColoredEnemy : public Enemy
-{
-public:
-	static void loadSurfaces();
-
-	         ColoredEnemy(const GameColor c);
-	virtual ~ColoredEnemy();
-
-protected:
-	GameColor _color;
-};
 
 class DonutEnemy : public Enemy
 {
@@ -78,8 +66,12 @@ public:
 	         FlyerEnemy();
 	virtual ~FlyerEnemy();
 
+	virtual void update();
+
 protected:
 	static Foliage::RotativeSurface *rot_surface_ship;
+
+	Trajectory _trajectory;
 };
 
 class TankEnemy : public Enemy

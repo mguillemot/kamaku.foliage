@@ -1,3 +1,4 @@
+#include <iostream>
 #include "font.hpp"
 
 Font::Font()
@@ -137,6 +138,8 @@ Font::Font()
 	Foliage::Instancizator::instancize(_characters['8']);
 	_characters['9'] = Foliage::BitmapLoader::loadBitmap("9.bmp");
 	Foliage::Instancizator::instancize(_characters['9']);
+
+	std::cout << "Font loaded." << std::endl;
 }
 
 Font::~Font()

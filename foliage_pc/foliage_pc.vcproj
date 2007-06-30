@@ -211,10 +211,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\game\gamecolor.hpp"
-				>
-			</File>
-			<File
 				RelativePath="..\game\jauge.hpp"
 				>
 			</File>
@@ -231,6 +227,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\game\scene.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\game\scene.hpp"
+				>
+			</File>
+			<File
 				RelativePath="..\game\sm.cpp"
 				>
 			</File>
@@ -240,6 +244,14 @@
 			</File>
 			<File
 				RelativePath="..\game\start.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\game\trajectory.hpp"
+				>
+			</File>
+			<File
+				RelativePath="..\game\utils.hpp"
 				>
 			</File>
 		</Filter>

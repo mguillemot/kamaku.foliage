@@ -6,20 +6,29 @@
 #include "foliage.hpp"
 #include "sm.hpp"
 
-#define RYTHMDISPLAY_WIDTH  50
+#define RYTHMDISPLAY_WIDTH  80
 #define RYTHMDISPLAY_HEIGHT 100
 
+/*
 enum Events
 {
 	EVENT_NONE = 0,
-	EVENT_MAIN = 1,
-	EVENT_SUB = 2
+	EVENT_1 = 1,
+	EVENT_2 = 2,
+	EVENT_3 = 4,
+	EVENT_4 = 8,
+	EVENT_5 = 16,
+	EVENT_6 = 32,
+	EVENT_7 = 64,
+	EVENT_8 = 128
 };
+*/
 
 struct Beat
 {
 	Foliage::Fixed time;
-	Uint32 events;
+	bool tap[8];
+	Foliage::Fixed hold[8];
 };
 
 typedef std::deque<Beat> Beats;
@@ -35,6 +44,11 @@ public:
 		_sm = new Sm::SMfile();
 		Sm::load_sm(_sm, "maison.sm");
 		_measure = 0;
+		for (Sint32 k = 0; k < 8; k++)
+		{
+			_tap[k] = false;
+			_hold[k] = F_0;
+		}
 		std::cout << _sm->level[0].measure_nb << " measures." << std::endl;
 		_representation = Foliage::Surface::createEmptySurface(Foliage::Size(RYTHMDISPLAY_WIDTH, RYTHMDISPLAY_HEIGHT), "rythm");
 		const Foliage::Fixed bpm = Foliage::Fixed(333.3333333f);
@@ -48,23 +62,46 @@ public:
 			const Foliage::Fixed note_length = measure_length / Sint16(_sm->level[0].measure[i].notes_nb);
 			for (Sint32 j = 0; j < _sm->level[0].measure[i].notes_nb; j++)
 			{
-				b.events = EVENT_NONE;
-				if (_sm->level[0].measure[i].notes[j].tap[Sm::LEFT_A] == Sm::TAP)
+				bool beatActive = false;
+				for (Sint32 k = 0; k < 8; k++)
 				{
-					b.events = EVENT_MAIN;
-					_beats.push_back(b);
+					
+					if (_sm->level[0].measure[i].notes[j].tap[k] == Sm::TAP)
+					{
+						b.tap[k] = true;
+						beatActive = true;
+					}
+					else
+					{
+						b.tap[k] = false;
+					}
+					if (_sm->level[0].measure[i].notes[j].tap[k] == Sm::BEGIN_HOLD)
+					{
+						Foliage::Fixed duration;
+						// search for corresponding END_HOLD
+						Sint32 i2 = i;
+						Sint32 j2 = j;
+						while (_sm->level[0].measure[i2].notes[j2].tap[k] != Sm::END_HOLD)
+						{
+							duration += measure_length / Sint16(_sm->level[0].measure[i2].notes_nb);
+							j2++;
+							if (j2 == _sm->level[0].measure[i2].notes_nb)
+							{
+								j2 = 0; 
+								i2++;
+							}
+						}
+						// END_HOLD at measure i2, note j2
+						b.hold[k] = duration;						
+						beatActive = true;
+					}
+					else
+					{
+						b.hold[k] = F_0;
+					}
 				}
-				else if (_sm->level[0].measure[i].notes[j].tap[Sm::RIGHT_A] == Sm::TAP)
+				if (beatActive)
 				{
-					_beats.push_back(b);
-				}
-				else if (_sm->level[0].measure[i].notes[j].tap[Sm::UP_A] == Sm::TAP)
-				{
-					_beats.push_back(b);
-				}
-				else if (_sm->level[0].measure[i].notes[j].tap[Sm::DOWN_A] == Sm::TAP)
-				{
-					b.events = EVENT_SUB;
 					_beats.push_back(b);
 				}
 				b.time += note_length;
@@ -82,7 +119,14 @@ public:
 	void update()
 	{
 		// Update internal state
-		_events = EVENT_NONE;
+		for (Sint32 k = 0; k < 8; k++)
+		{
+			_tap[k] = false;
+			if (_hold[k] > F_0)
+			{
+				_hold[k] -= one_frame;
+			}
+		}
 		_thisFrame = Foliage::Fixed(Sint16(_timer.duration() / 1000));
 		Beats::iterator i = _beats.begin();
 		while (i != _beats.end())
@@ -92,26 +136,16 @@ public:
 			if (delay < 0)
 			{
 				_temp--;
-				/*
-				if (_temp == 0)
+				for (Sint32 k = 0; k < 8; k++)
 				{
-					_temp = 4;
-					_events |= EVENT_MAIN;
+					_tap[k] = i->tap[k];
+					if (i->hold[k] > F_0)
+					{
+						_hold[k] = i->hold[k];
+					}
 				}
-				else if (_temp == 2)
-				{
-					_events |= EVENT_SUB;
-				}
-				*/
-				_events = i->events;
 				_lastEvent = i->time;
 				i = _beats.erase(i);
-			}
-			else if (delay >= 0 && delay < RYTHMDISPLAY_HEIGHT)
-			{
-				delay = RYTHMDISPLAY_HEIGHT - delay - 1;
-				_representation->drawLine(Foliage::Point(20, delay), Foliage::Point(30, delay), Foliage::Colors::Black);
-				++i;
 			}
 			else
 			{
@@ -121,10 +155,11 @@ public:
 
 		// Update representation
 		_representation->fill(Foliage::Colors::Transparent);
+		for (Sint32 k = 0; k < 8; k++)
+		{
+			_representation->drawLine(Foliage::Point((RYTHMDISPLAY_WIDTH / 8) * k + (RYTHMDISPLAY_WIDTH / 16), 0), Foliage::Point((RYTHMDISPLAY_WIDTH / 8) * k + (RYTHMDISPLAY_WIDTH / 16), RYTHMDISPLAY_HEIGHT - 1), Foliage::Colors::White);
+		}
 		_representation->drawRect(Foliage::Rect(0, 0, RYTHMDISPLAY_WIDTH, RYTHMDISPLAY_HEIGHT), Foliage::Colors::Blue);
-		_representation->drawLine(Foliage::Point(0, 0), Foliage::Point(RYTHMDISPLAY_WIDTH - 1, RYTHMDISPLAY_HEIGHT - 1), Foliage::Colors::Blue);
-		_representation->drawLine(Foliage::Point(0, RYTHMDISPLAY_HEIGHT - 1), Foliage::Point(RYTHMDISPLAY_WIDTH - 1, 0), Foliage::Colors::Blue);
-		_representation->drawLine(Foliage::Point(RYTHMDISPLAY_WIDTH / 2, 0), Foliage::Point(RYTHMDISPLAY_WIDTH / 2, RYTHMDISPLAY_HEIGHT - 1), Foliage::Colors::White);
 		i = _beats.begin();
 		while (i != _beats.end())
 		{
@@ -139,7 +174,25 @@ public:
 			else if (delay < RYTHMDISPLAY_HEIGHT)
 			{
 				delay = RYTHMDISPLAY_HEIGHT - delay - 1;
-				_representation->drawLine(Foliage::Point(20, delay), Foliage::Point(30, delay), Foliage::Colors::Black);
+				for (Sint32 k = 0; k < 8; k++)
+				{
+					if (i->tap[k])
+					{
+						_representation->drawLine(Foliage::Point((RYTHMDISPLAY_WIDTH / 8) * k + (RYTHMDISPLAY_WIDTH / 16) - 3, delay), Foliage::Point((RYTHMDISPLAY_WIDTH / 8) * k + (RYTHMDISPLAY_WIDTH / 16) + 3, delay), Foliage::Colors::Black);
+					}
+					if (i->hold[k] > F_0)
+					{
+						Foliage::Fixed holdEnd = fdelay + i->hold[k];
+						Sint16 endDelay = Sint16(holdEnd / one_frame);
+						endDelay = RYTHMDISPLAY_HEIGHT - endDelay - 1;
+						if (endDelay < 0)
+						{
+							endDelay = 0;
+						}
+						Foliage::Rect r(Foliage::Point((RYTHMDISPLAY_WIDTH / 8) * k + (RYTHMDISPLAY_WIDTH / 16) - 3, endDelay), Foliage::Size(7, delay - endDelay));
+						_representation->fillRect(r, Foliage::Colors::Black);
+					}
+				}
 				++i;
 			}
 			else
@@ -147,11 +200,25 @@ public:
 				break;
 			}
 		}
-		if (_events & EVENT_MAIN)
+		for (Sint32 k = 0; k < 8; k++)
+		{
+			if (_hold[k] > F_0)
+			{
+				Sint16 endDelay = Sint16(_hold[k] / one_frame);
+				endDelay = RYTHMDISPLAY_HEIGHT - endDelay - 1;
+				if (endDelay < 0)
+				{
+					endDelay = 0;
+				}
+				Foliage::Rect r(Foliage::Point((RYTHMDISPLAY_WIDTH / 8) * k + (RYTHMDISPLAY_WIDTH / 16) - 3, endDelay), Foliage::Size(7, RYTHMDISPLAY_HEIGHT - 1 - endDelay));
+				_representation->fillRect(r, Foliage::Colors::Black);
+			}			
+		}
+		if (tap(0))
 		{
 			_representation->fillRect(Foliage::Rect(0, 0, RYTHMDISPLAY_WIDTH, RYTHMDISPLAY_HEIGHT), Foliage::Colors::Red);
 		}
-		else if (_events & EVENT_SUB)
+		else if (tap(1))
 		{
 			_representation->fillRect(Foliage::Rect(0, 0, RYTHMDISPLAY_WIDTH, RYTHMDISPLAY_HEIGHT), Foliage::Colors::Blue);
 		}
@@ -186,9 +253,14 @@ public:
 		}
 	}
 
-	Uint32 events() const
+	bool tap(const Sint32 k) const
 	{
-		return _events;
+		return _tap[k];
+	}
+
+	bool hold(const Sint32 k) const
+	{
+		return (_hold[k] > F_0);
 	}
 
 protected:
@@ -200,7 +272,8 @@ protected:
 	Foliage::Surface *_representation;
 	Foliage::Fixed    _lastEvent;
 	Foliage::Fixed    _thisFrame;
-	Uint32            _events;
+	bool              _tap[8];
+	Foliage::Fixed    _hold[8];
 	Sm::SMfile       *_sm;
 	Sint32            _measure;
 

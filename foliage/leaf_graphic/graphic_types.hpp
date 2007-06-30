@@ -1,6 +1,7 @@
 #ifndef __FOLIAGE_GRAPHIC_TYPES
 #define __FOLIAGE_GRAPHIC_TYPES
 
+#include <iostream>
 #include "../basic_types.hpp"
 #include "../settings.hpp"
 #include "../fastmath.hpp"
@@ -113,6 +114,11 @@ namespace Foliage
 			y += shift.y;
 		}
 
+		Size size() const
+		{
+			return Size(w, h);
+		}
+
 		Point center() const
 		{
 			Point p(x, y);
@@ -124,6 +130,12 @@ namespace Foliage
 		static bool intersects(const Rect &a, const Rect &b)
 		{
 			return !(b.x > a.x + a.w || b.x + b.w < a.x || b.y > a.y + a.h || b.y + b.h < a.y);
+		}
+
+		friend std::ostream & operator<<(std::ostream &s, const Rect &r)
+		{
+			s << "((" << r.x << ", " << r.y << ") => (" << (r.x + r.w) << ", " << (r.y + r.h) << "))";
+			return s;
 		}
 	};
 }

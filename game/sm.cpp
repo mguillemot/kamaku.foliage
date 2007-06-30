@@ -61,8 +61,10 @@ namespace Sm
  */
 int get_file_size(char filename[])
 {
+#ifdef __PPC__
   char readBuffer[1024];
-  int filesize, numread;
+  int filesize;
+  size_t numread;
   FILE *infile;
 
   DEBUG_USER("Computing filesize of %s... ", filename);
@@ -76,15 +78,18 @@ int get_file_size(char filename[])
   do
   {
     numread = fread(readBuffer, 1, 1024, infile);
-    filesize += numread;
+    filesize += int(numread);
   } while (numread);
   fclose(infile);
   DEBUG_USER("done.\r\nFilesize is %d bytes.\r\n", filesize);
   return filesize;
-//TEMP: fast version disabled for Xilinx compatibility for now
-//	std::ifstream infile(filename);
-//	long size = infile.rdbuf()->pubseekoff(0, std::ios::end, std::ios::in);
-//	return (int)size;
+#else
+	std::string ext_filename = "../game/resources/";
+	ext_filename += filename;
+	std::ifstream infile(ext_filename.c_str());
+	long size = infile.rdbuf()->pubseekoff(0, std::ios::end, std::ios::in);
+	return (int)size;
+#endif
 }
 
 /*
@@ -593,11 +598,19 @@ XStatus fetch_notes(char *buf, SMfile *sm)
     if (str_equal(s, "dance-single"))
     {
       sm->level[j].notestype = DANCE_SINGLE;
+	  sm->level[j].nbtaps = 4;
       DEBUG_USER("dance-single | ");
     }
+	else if (str_equal(s, "dance-double"))
+	{
+		sm->level[j].notestype = DANCE_DOUBLE;
+	  sm->level[j].nbtaps = 8;
+		DEBUG_USER("dance-double | ");
+	}
     else
     {
       sm->level[j].notestype = OTHER;
+	  sm->level[j].nbtaps = 4;
       DEBUG_USER("other | ");
     }
   i++; // on zappe le ':'
@@ -738,7 +751,7 @@ TapType char_to_TapType(char c)
  * et la stocke dans "destination" qui doit avoir été alloué auparavant
  * tout en positionnant "pos" sur le premier caractère à la fin de la mesure.
  */
-XStatus fetch_measure(char *buf, int *pos, Measure *destination)
+XStatus fetch_measure(char *buf, int *pos, Measure *destination, int nbtap)
 {
   int i, j, k;
 
@@ -767,7 +780,7 @@ XStatus fetch_measure(char *buf, int *pos, Measure *destination)
   i = *pos;
   for (k = 0; k < destination->notes_nb; k++)
   {
-    for (j = 0; j < 4; j++)
+    for (j = 0; j < nbtap; j++)
     {
       destination->notes[k].tap[j] = char_to_TapType(buf[i]);
       i++;
@@ -792,9 +805,9 @@ XStatus load_level(char *buf, SMfile *sm, int level)
     return XST_FAILURE;
   }
   lvl = &(sm->level[level]);
-  if (lvl->notestype != DANCE_SINGLE)
+  if (lvl->notestype != DANCE_SINGLE && lvl->notestype != DANCE_DOUBLE)
   {
-    DEBUG_USER("SKIP: dance-single is the only supported mode.\r\n");
+    DEBUG_USER("SKIP: dance-single & dance-double are the only supported modes.\r\n");
     return XST_SUCCESS;
   }
 
@@ -825,7 +838,7 @@ XStatus load_level(char *buf, SMfile *sm, int level)
   i = deb;
   for (k = 0; k < lvl->measure_nb; k++)
   {
-    status = fetch_measure(buf, &i, &(lvl->measure[k]));
+	  status = fetch_measure(buf, &i, &(lvl->measure[k]), lvl->nbtaps);
     if (status == XST_SUCCESS)
     {
       DEBUG_USER("+");
@@ -869,7 +882,8 @@ XStatus load_sm(SMfile *sm, char filename[])
   #ifdef __PPC__
     infile = fopen(filename, "r");
   #else
-    std::string ext_filename = "../game/resources/" + std::string(filename);
+    std::string ext_filename = "../game/resources/";
+	ext_filename += filename;
     fopen_s(&infile, ext_filename.c_str(), "r");
   #endif
   if (! infile)

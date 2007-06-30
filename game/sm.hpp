@@ -46,18 +46,17 @@ struct BGchange
   char *bg;
 };
 
-enum NotesType { DANCE_SINGLE, OTHER }; // Les modes autres que DANCE_SINGLE
-                                        // ne sont pas gérés pour l'instant
+enum NotesType { DANCE_SINGLE, DANCE_DOUBLE, OTHER };
 
 enum DifficultyClass { BEGINNER, EASY, MEDIUM, HARD, CHALLENGE };
 
-enum Direction { LEFT_A = 0, DOWN_A = 1, UP_A = 2, RIGHT_A = 3 };
+enum Direction { LEFT_A = 0, DOWN_A = 1, UP_A = 2, RIGHT_A = 3, LEFT_A_2 = 4, DOWN_A_2 = 5, UP_A_2 = 6, RIGHT_A_2 = 7 };
 
 enum TapType { NONE = 0, TAP = 1, BEGIN_HOLD = 2, END_HOLD = 3 };
 
 struct Tap
 {
-  TapType tap[4]; // On se limite ici à 4 Tap par note (mode DANCE_SINGLE)
+  TapType tap[8];
 };
 
 struct Measure
@@ -69,6 +68,7 @@ struct Measure
 struct Level
 {
   NotesType       notestype;
+  int             nbtaps;
   char           *description;
   DifficultyClass difficultyclass;
   int             difficultymeter;

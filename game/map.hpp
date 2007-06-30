@@ -10,6 +10,7 @@ public:
 	Map(Foliage::Surface *map)
 	{
 		_map = map;
+		_scrollSpeed = 1;
 		#ifdef __PPC
 			_map1 = _map->createNewShiftedSurface(1);
 			_map2 = _map->createNewShiftedSurface(2);
@@ -68,16 +69,28 @@ public:
 		#endif
 	}
 
+	void setScrollSpeed(const Sint32 speed)
+	{
+		_scrollSpeed = speed;
+		_scrollSpeedDecr = speed;
+	}
+
 	void update()
 	{
-		if (_scroll > 0)
+		_scrollSpeedDecr--;
+		if (_scrollSpeedDecr <= 0)
 		{
-			_scroll--;
+			_scrollSpeedDecr = _scrollSpeed;
+			if (_scroll > 0)
+			{
+				_scroll--;
+			}
 		}
 		const Foliage::Point pos = currentLevel->playerShip->getPosition();
-		const Foliage::Size size = currentLevel->playerShip->getSize();
+		const Foliage::Rect shipHitbox = currentLevel->playerShip->getHitbox()->rects()[0];
 		Foliage::Fixed percent(pos.x);
-		percent /= Foliage::Fixed(Sint16(Foliage::Screen::Width - size.w));
+		percent += shipHitbox.x;
+		percent /= Foliage::Fixed(Sint16(Foliage::Screen::Width - shipHitbox.w));
 		percent *= maxShift();
 		_currentShift = Sint16(percent);
 	}
@@ -90,6 +103,7 @@ protected:
 		Foliage::Surface *_map3;
 	#endif
 	Sint16            _scroll;
+	Sint32            _scrollSpeed, _scrollSpeedDecr;
 	Sint16            _currentWidth;
 	Sint16            _currentShift;
 };
