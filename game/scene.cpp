@@ -172,7 +172,7 @@ void LevelScene::update()
 	}
 	ship->setSpeed(s);
 	ship->update();
-	ListEnemy::iterator enn = currentLevel->enemies.begin();
+	std::list<Enemy*>::iterator enn = currentLevel->enemies.begin();
 	while (enn != currentLevel->enemies.end())
 	{
 		Enemy *e = *enn;
@@ -259,7 +259,7 @@ void LevelScene::postRender()
 	{
 		ship->drawHitbox(Colors::Green);
 	}
-	for (ListEnemy::const_iterator ennn = currentLevel->enemies.begin(); ennn != currentLevel->enemies.end(); ++ennn)
+	for (std::list<Enemy*>::const_iterator ennn = currentLevel->enemies.begin(); ennn != currentLevel->enemies.end(); ++ennn)
 	{
 		(*ennn)->display();
 		if (currentGame->show_hitbox)
@@ -267,7 +267,7 @@ void LevelScene::postRender()
 			(*ennn)->drawHitbox(Colors::Black);
 		}
 	}
-	ListBullet::iterator i = currentLevel->enemyBullets.begin();
+	std::list<Bullet*>::iterator i = currentLevel->enemyBullets.begin();
 	while (i != currentLevel->enemyBullets.end())
 	{
 		Bullet *b = *i;
@@ -296,7 +296,7 @@ void LevelScene::postRender()
 			}
 		}
 	}
-	ListBullet::iterator j = currentLevel->myBullets.begin();
+	std::list<Bullet*>::iterator j = currentLevel->myBullets.begin();
 	while (j != currentLevel->myBullets.end())
 	{
 		Bullet *b = *j;
@@ -310,7 +310,7 @@ void LevelScene::postRender()
 		{
 			bool deleted = false;
 			b->getEntity()->draw();
-			for (ListEnemy::iterator enn = currentLevel->enemies.begin(); enn != currentLevel->enemies.end(); ++enn)
+			for (std::list<Enemy*>::iterator enn = currentLevel->enemies.begin(); enn != currentLevel->enemies.end(); ++enn)
 			{
 				Enemy *enemy = *enn;
 				if (enemy->collisionTest(b))

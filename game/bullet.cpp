@@ -2,6 +2,7 @@
 #include "bullet.hpp"
 #include "fastmath.hpp"
 #include "game_globals.hpp"
+#include "rythm_display.hpp"
 
 #define NB_BULLET_TYPES 6
 

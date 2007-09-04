@@ -49,8 +49,6 @@ protected:
 	static std::vector<Foliage::Surface *> _bulletSurfaces;
 };
 
-typedef std::list<Bullet *> ListBullet; //, PoolAllocator<Bullet*, LevelPool> (disabled for x86 compatibility)
-
 class BulletGenerator : public Bullet
 {
 public:

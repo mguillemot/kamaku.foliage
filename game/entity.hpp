@@ -4,6 +4,7 @@
 #include <vector>
 #include "foliage.hpp"
 #include "hitbox.hpp"
+#include "game_globals.hpp"
 
 class Entity
 {
@@ -36,7 +37,7 @@ public:
 
 	bool outOfScreen() const
 	{
-		const Foliage::Point pos = getPosition();
+		const Foliage::Point pos = getScreenPosition();
 		const Foliage::Size size = getSize();
 		return (pos.y >= Foliage::Screen::Height || (pos.y + size.h) <= 0
 			|| pos.x >= Foliage::Screen::Width || (pos.x + size.w) <= 0);
@@ -46,9 +47,13 @@ public:
 	{
 		_x += _speed.x;
 		_y += _speed.y;
+		if (_flyer)
+		{
+			_y += currentLevel->map->thisFrameScroll();
+		}
 		if (_constrained)
 		{
-			const Foliage::Point pos = getPosition();
+			const Foliage::Point pos = getScreenPosition();
 			for (std::vector<Foliage::Rect>::const_iterator i = _hitbox.rects().begin(); i != _hitbox.rects().end(); ++i)
 			{
 				Foliage::Rect r = *i;
@@ -75,7 +80,7 @@ public:
 
 	void draw()
 	{
-		getCurrentSurface()->drawAt(getPosition());
+		getCurrentSurface()->drawAt(getScreenPosition());
 	}
 
 	void setPosition(const Foliage::Point p)
@@ -87,6 +92,11 @@ public:
 	Foliage::Point getPosition() const
 	{
 		return Foliage::Point(Sint16(_x), Sint16(_y));
+	}
+
+	Foliage::Point getScreenPosition() const
+	{
+		return (getPosition() - currentLevel->viewPort);
 	}
 
 	Foliage::Point getCenter() const
@@ -110,7 +120,7 @@ public:
 
 	void drawHitbox(const Foliage::Color color) const
 	{
-		_hitbox.drawCollidableZoneAt(color, getPosition());
+		_hitbox.drawCollidableZoneAt(color, getScreenPosition());
 	}
 
 	static bool collisionTest(Entity* a, Entity* b)
@@ -124,6 +134,7 @@ protected:
 	Foliage::Speed  _speed;
 	Hitbox          _hitbox;
 	bool            _constrained;
+	bool            _flyer;
 };
 
 class SimpleEntity : public Entity

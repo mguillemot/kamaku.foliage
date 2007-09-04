@@ -1,15 +1,15 @@
 #ifndef __GAME_GLOBALS
 #define __GAME_GLOBALS
 
-#include <string>
 #include <list>
-#include "enemy.hpp"
 #include "foliage.hpp"
-#include "bullet.hpp"
-#include "laser.hpp"
-#include "rythm_display.hpp"
 
 class Map;
+class RythmDisplay;
+class Bullet;
+class Enemy;
+class Laser;
+class Entity;
 
 struct Game
 {
@@ -30,14 +30,15 @@ struct Level
 {
 public:
 	Game*            game;
-	ListBullet       enemyBullets;
-	ListBullet       myBullets;
-	ListLaser        enemyLasers;
+	std::list<Bullet*> enemyBullets;
+	std::list<Bullet*> myBullets;
+	std::list<Laser*> enemyLasers;
 	Entity*          playerShip;
 	Sint32           time;
-	ListEnemy        enemies;
+	std::list<Enemy*> enemies;
 	Map*             map;
 	RythmDisplay*    rythm;
+	Foliage::Point   viewPort;
 
 	void reset()
 	{

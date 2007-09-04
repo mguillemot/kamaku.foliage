@@ -14,7 +14,7 @@ public:
     virtual     ~Enemy();
 
     virtual void   update();
-	Bullet        *fireAt(const Foliage::Point turret, const Foliage::Point target, const Foliage::Fixed speed, const Foliage::Fixed shift_angle, const BulletType bulletType) const;
+	Bullet*        fireAt(const Foliage::Point turret, const Foliage::Point target, const Foliage::Fixed speed, const Foliage::Fixed shift_angle, const BulletType bulletType) const;
 	virtual void   display() const;
     void           explode();
 	bool           isDead() const;
@@ -32,8 +32,6 @@ protected:
     Sint32  _killedDuration;
     Sint32  _life;
 };
-
-typedef std::list<Enemy *> ListEnemy;
 
 class DonutEnemy : public Enemy
 {

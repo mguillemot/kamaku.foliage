@@ -73,6 +73,11 @@ namespace Foliage
 		{
 			return Point(x + s.x, y + s.y);
 		}
+
+		const Point operator-(const Point s) const
+		{
+			return Point(x - s.x, y - s.y);
+		}
 	};
 	
 	struct Speed

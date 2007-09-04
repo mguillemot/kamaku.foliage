@@ -1,5 +1,7 @@
 #include "foliage.hpp"
 #include "scene.hpp"
+#include "bullet.hpp"
+#include "enemy.hpp"
 
 #ifdef main
 #undef main

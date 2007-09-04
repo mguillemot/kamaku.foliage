@@ -3,21 +3,21 @@
 
 #include "foliage.hpp"
 #include "game_globals.hpp"
-#include <iostream>
+#include "entity.hpp"
+
 class Map
 {
 public:
 	Map(Foliage::Surface *map)
 	{
 		_map = map;
-		std::cout << "map size = " << map->getSize() << std::endl;
 		_scrollSpeed = 1;
 		#ifdef __PPC
 			_map1 = _map->createNewShiftedSurface(1);
 			_map2 = _map->createNewShiftedSurface(2);
 			_map3 = _map->createNewShiftedSurface(3);
 		#endif
-		_scroll = _map->getSize().h - 320;
+		currentLevel->viewPort.y = _map->getSize().h - 320;
 		_currentWidth = _map->getSize().w;
 	}
 
@@ -33,7 +33,12 @@ public:
 
 	Sint16 currentShift() const
 	{	
-		return _currentShift;
+		return currentLevel->viewPort.x;
+	}
+
+	Sint16 thisFrameScroll() const
+	{
+		return _thisFrameScroll;
 	}
 
 	Foliage::Synchronizator asyncDraw() const
@@ -41,8 +46,8 @@ public:
 		Foliage::Rect section;
 		section.w = 240;
 		section.h = 320;
-		section.x = currentShift();
-		section.y = _scroll;
+		section.x = currentLevel->viewPort.x;
+		section.y = currentLevel->viewPort.y;
 		if (section.y < 0)
 		{
 			section.y = 0;
@@ -79,12 +84,14 @@ public:
 	void update()
 	{
 		_scrollSpeedDecr--;
+		_thisFrameScroll = 0;
 		if (_scrollSpeedDecr <= 0)
 		{
 			_scrollSpeedDecr = _scrollSpeed;
-			if (_scroll > 0)
+			if (currentLevel->viewPort.y > 0)
 			{
-				_scroll--;
+				currentLevel->viewPort.y--;
+				_thisFrameScroll = -1;
 			}
 		}
 		const Foliage::Point pos = currentLevel->playerShip->getPosition();
@@ -93,7 +100,7 @@ public:
 		percent += shipHitbox.x;
 		percent /= Foliage::Fixed(Sint16(Foliage::Screen::Width - shipHitbox.w));
 		percent *= maxShift();
-		_currentShift = Sint16(percent);
+		currentLevel->viewPort.x = Sint16(percent);
 	}
 
 protected:
@@ -103,10 +110,8 @@ protected:
 		Foliage::Surface *_map2;
 		Foliage::Surface *_map3;
 	#endif
-	Sint16            _scroll;
-	Sint32            _scrollSpeed, _scrollSpeedDecr;
+	Sint32            _scrollSpeed, _scrollSpeedDecr, _thisFrameScroll;
 	Sint16            _currentWidth;
-	Sint16            _currentShift;
 };
 
 #endif //__MAP

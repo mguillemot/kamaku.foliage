@@ -2,6 +2,7 @@
 #include <list>
 #include <iostream>
 #include "enemy.hpp"
+#include "rythm_display.hpp"
 #include "game_globals.hpp"
 #include "bullet.hpp"
 
